@@ -1,4 +1,4 @@
-function svData = svUnpack(struct)
+function svData = svUnpack(struct, time)
 
 c = 299792458;
 L = height(struct.measurements.L1.psr);
@@ -18,6 +18,9 @@ for i = 1:L
         svData{i}.psr = struct.measurements.L1.psr(i,svInUse)';
         svData{i}.dopp = struct.measurements.L1.doppler(i,svInUse)' .* -(c/1575.42e6); % Hz to m/s
     
+        if (nargin > 1) && (i >= 1068)
+            svData{i}.gpsTime = svData{i}.gpsTime + 1;
+        end
         % check satellite data
         k = 0;
         for j = 1:length(svData{i}.svInUse)

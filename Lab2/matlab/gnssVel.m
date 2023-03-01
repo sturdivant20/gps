@@ -19,16 +19,26 @@ function [xDot, bDot] = gnssVel(x_sv, v_sv, x_user, dopp)
 %
 
 N = size(x_sv, 1);
+i = 0;
+x = [0;0;0;0];
+error = Inf;
 
-% generate unit vector and range to satellite
-u = x_sv - x_user';
-r = sqrt(sum(u.^2,2));
-uv = u./r;
+% while (error > 1e-6) && (i < 10)
+%     i = i+1;
 
-% least squares parameters
-H = [-uv, ones(N,1)];
-y = dopp - sum(uv.*v_sv, 2);
-x = inv(H'*H)*H'*y;
+    % generate unit vector and range to satellite
+    u = x_sv - x_user';
+    r = sqrt(sum(u.^2,2));
+    uv = u./r;
+    
+    % least squares parameters
+    H = [-uv, ones(N,1)];
+    y = dopp - (sum(uv.*v_sv, 2) + x(4));
+    dx = inv(H'*H)*H'*y;
+
+    x = x + dx;
+    error = norm(dx);
+% end
 
 xDot = x(1:3);
 bDot = x(4);

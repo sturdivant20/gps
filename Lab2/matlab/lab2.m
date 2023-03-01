@@ -37,25 +37,30 @@ RotMat = [-sind(lon0), -sind(lat0)*cosd(lon0), cosd(lat0)*cosd(lon0);
            0         ,  cosd(lat0)           , sind(lon0)];
 
 % unpack sv data and user position
-svData1 = svUnpack(RCVR_S1);
+svData1 = svUnpack(RCVR_S1, true);
 
-az = NaN(30,1819);
-el = NaN(30,1819);
-time = zeros(1819,1);
-lla = zeros(1819,3);
-DOP = zeros(4,4,1819);
-DOP_ENU = zeros(3,3,1819);
-num_sv = zeros(1819,1);
-b = zeros(1819,1);
-bDot = zeros(1819,1);
-x = zeros(1819,3);
-xDot = zeros(1819,3);
+L = length(svData1);
+az = NaN(30,L);
+el = NaN(30,L);
+time = zeros(L,1);
+lla = zeros(L,3);
+DOP = zeros(4,4,L);
+DOP_ENU = zeros(3,3,L);
+num_sv = zeros(L,1);
+b = zeros(L,1);
+bDot = zeros(L,1);
+x = zeros(L,3);
+xDot = zeros(L,3);
 
-for i = 1:length(svData1)
+for i = 1:L
     time(i) = svData1{i}.gpsTime - svData1{1}.gpsTime;
+
     x(i,:) = svData1{i}.x';
     lla(i,:) = svData1{i}.lla;
     xDot(i,:) = svData1{i}.xDot';
+    if norm(xDot(i,:)) > 25
+        xDot(i,:) = [0,0,0];
+    end
 
     DOP(:,:,i) = svData1{i}.DOP;
     DOP_ENU(:,:,i) = RotMat' * DOP(1:3,1:3,i) * RotMat;
@@ -79,17 +84,17 @@ h.MaskElevation = 10;
 
 % GEOPLOT
 ax(2) = geoaxes(Parent=tab(2));
-g = geoplot(ax(2), lla((1:914),1), lla((1:914),2), 'o');
+g = geoplot(ax(2), lla(:,1), lla(:,2), 'o');
 geobasemap(ax(2), "satellite");
 geolimits(ax(2), [32.586038, 32.586437], [-85.494653, -85.493987]);
 
 % DOPS PLOT
-DOP11 = reshape(DOP(1,1,:), 1, 1819);
-DOP22 = reshape(DOP(2,2,:), 1, 1819);
-DOP33 = reshape(DOP(3,3,:), 1, 1819);
-DOP_ENU11 = reshape(DOP_ENU(1,1,:), 1, 1819);
-DOP_ENU22 = reshape(DOP_ENU(2,2,:), 1, 1819);
-DOP_ENU33 = reshape(DOP_ENU(3,3,:), 1, 1819);
+DOP11 = reshape(DOP(1,1,:), 1, L);
+DOP22 = reshape(DOP(2,2,:), 1, L);
+DOP33 = reshape(DOP(3,3,:), 1, L);
+DOP_ENU11 = reshape(DOP_ENU(1,1,:), 1, L);
+DOP_ENU22 = reshape(DOP_ENU(2,2,:), 1, L);
+DOP_ENU33 = reshape(DOP_ENU(3,3,:), 1, L);
 PDOP = sqrt((DOP11+DOP22+DOP33));
 HDOP = sqrt((DOP_ENU11+DOP_ENU22));
 VDOP = sqrt((DOP_ENU33));
@@ -98,21 +103,21 @@ ax(3) = axes(Parent=tab(3));
 sgtitle("Dilution of Precision")
 subplot(2,1,2);
 hold on;
-plot(time(1:914), PDOP(1:914), LineWidth=2.5, DisplayName='PDOP');
-plot(time(1:914), HDOP(1:914), LineWidth=2.5, DisplayName='HDOP');
-plot(time(1:914), VDOP(1:914), LineWidth=2.5, DisplayName='VDOP');
+plot(time, PDOP, '.', LineWidth=2.5, DisplayName='PDOP');
+plot(time, HDOP, '.', LineWidth=2.5, DisplayName='HDOP');
+plot(time, VDOP, '.', LineWidth=2.5, DisplayName='VDOP');
 grid on;
 legend;
-xlim([0, 914]);
 xlabel("Time [s]")
 ylabel("DOP")
+xlim([0,L]);
 
 subplot(2,1,1);
-plot(num_sv(1:914), LineWidth=2.5, DisplayName='Num. SV');
+plot(num_sv, '.', LineWidth=2.5, DisplayName='Num. SV');
 grid on;
 legend;
-xlim([0, 914]);
 ylabel("SV in Use")
+xlim([0,L]);
 
 % ENU PLOT
 [xe,xn,xu] = ecef2enu(x(:,1), x(:,2), x(:,3), lat0, lon0, h0, wgs84Ellipsoid("meter"));
@@ -121,26 +126,26 @@ ax(4) = axes(Parent=tab(4));
 sgtitle("ENU Position Relative to Toomer's Corner")
 
 subplot(3,1,1)
-plot(time(1:914), xe(1:914), LineWidth=2.5, DisplayName="East")
+plot(time, xe, '.', LineWidth=2.5, DisplayName="East")
 grid on;
 legend;
-xlim([0, 914]);
 ylabel("East Position [m]")
+xlim([0,L]);
 
 subplot(3,1,2)
-plot(time(1:914), xn(1:914), LineWidth=2.5, DisplayName="North")
+plot(time, xn, '.', LineWidth=2.5, DisplayName="North")
 grid on;
 legend;
-xlim([0, 914]);
 ylabel("North Position [m]")
+xlim([0,L]);
 
 subplot(3,1,3)
-plot(time(1:914), xu(1:914), LineWidth=2.5, DisplayName="Up")
+plot(time, xu, '.', LineWidth=2.5, DisplayName="Up")
 grid on;
 legend;
-xlim([0, 914]);
 xlabel("Time [s]")
 ylabel("Up Position [m]")
+xlim([0,L]);
 
 % ENU VELOCITY
 [ve,vn,vu] = ecef2enuv(xDot(:,1), xDot(:,2), xDot(:,3), lat0, lon0);
@@ -148,31 +153,31 @@ ylabel("Up Position [m]")
 ax(5) = axes(Parent=tab(5));
 sgtitle("ENU Velocity")
 subplot(3,1,1);
-plot(time(1:914), ve(1:914), LineWidth=2.5, DisplayName="East");
+plot(time, ve, '.', LineWidth=2.5, DisplayName="East");
 grid on;
 legend;
-xlim([0, 914]);
 ylabel("East Velocity [m/s]")
+xlim([0,L]);
 
 subplot(3,1,2);
-plot(time(1:914), vn(1:914), LineWidth=2.5, DisplayName="Norht");
+plot(time, vn, '.', LineWidth=2.5, DisplayName="North");
 grid on;
 legend;
-xlim([0, 914]);
 ylabel("North Velocity [m/s]")
+xlim([0,L]);
 
 subplot(3,1,3);
-plot(time(1:914), vu(1:914), LineWidth=2.5, DisplayName="Up");
+plot(time, vu, '.', LineWidth=2.5, DisplayName="Up");
 grid on;
 legend;
-xlim([0, 914]);
 ylabel("Up Velocity [m/s]")
 xlabel("Time [s]")
+xlim([0,L]);
 
 % GEOPLOT TOOMER'S
 ax(6) = geoaxes(Parent=tab(6));
 hold(ax(6), "on");
-geoplot(ax(6), lla((1:914),1), lla((1:914),2), 'o', LineWidth=3, MarkerSize=5, DisplayName="Estimates");
+geoplot(ax(6), lla(:,1), lla(:,2), 'o', LineWidth=3, MarkerSize=5, DisplayName="Estimates");
 geoplot(ax(6), lat0, lon0, '*', LineWidth=3, MarkerSize=10, DisplayName="Toomer's Corner");
 geobasemap(ax(6), "streets");
 
@@ -195,6 +200,7 @@ b = zeros(L,1);
 bDot = zeros(L,1);
 x = zeros(L,3);
 xDot = zeros(L,3);
+speed = zeros(L,1);
 
 % pull in data
 k = 0;
@@ -250,6 +256,7 @@ grid on;
 legend;
 ylabel("Error [m]")
 xlabel("Time [s]")
+xlim([0,L]);
 
 subplot(2,1,1);
 plot(num_sv, LineWidth=2.5, DisplayName='Num. SV');
@@ -260,22 +267,35 @@ ylabel("SV in Use")
 % SPEED AND COURSE
 [ve,vn,vu] = ecef2enuv(xDot(:,1), xDot(:,2), xDot(:,3), lat0, lon0);
 speed = vecnorm([ve,vn,vu],2,2);
+ve(speed > 25) = NaN;
+vn(speed > 25) = NaN;
+bDot(speed > 25) = NaN;
+bDot2 = fillgaps(bDot, 5, 1);
+speed(speed > 25) = NaN;
+speed2 = fillgaps(speed, 5, 1);
 course = atan2d(ve, vn);
+course2 = fillgaps(course, 5, 1);
 
 ax(9) = axes(Parent=tab(9));
 sgtitle("Speed and Course")
 subplot(2,1,1);
-plot(time, speed, LineWidth=2.5, DisplayName="Speed");
+hold on
+plot(time, speed2, 'r-', LineWidth=2, HandleVisibility="off");
+plot(time, speed, 'b.', LineWidth=3.5, DisplayName="Speed");
 grid on;
 legend;
 ylabel("Velocity Magnitude [m/s]")
+xlim([0,L]);
 
 subplot(2,1,2);
-plot(time, course, LineWidth=2.5, DisplayName="Course");
+hold on;
+plot(time, course2, 'r-', LineWidth=2, HandleVisibility="off");
+plot(time, course, 'b.', LineWidth=3.5, DisplayName="Course");
 grid on;
 legend;
 ylabel("Course [deg]")
 xlabel("Time [s]")
+xlim([0,L]);
 
 % CLOCK BIAS AND DRIFT
 ax(10) = axes(Parent=tab(10));
@@ -285,13 +305,17 @@ plot(time, b, LineWidth=2.5, DisplayName="Bias");
 grid on;
 legend;
 ylabel("Bias [m]");
+xlim([0,L]);
 
 subplot(2,1,2);
-plot(time, bDot, LineWidth=2.5, DisplayName="Drift");
+hold on
+plot(time, bDot2, 'r-', LineWidth=2, HandleVisibility="off");
+plot(time, bDot, 'b.', LineWidth=3.5, DisplayName="Drift");
 grid on;
 legend;
 xlabel("Time [m]");
 ylabel("Drift [m/s]");
+xlim([0,L]);
 
 % figure
 % % plot(time, ve, time, vn, time ,vu)
@@ -330,14 +354,14 @@ h = skyplot(az', el', labels);
 h.LabelFontSize = 16;
 % h.MaskElevation = 10;
 
-% exportgraphics(tab(1), "../media/static_skyplot.png");
-% exportgraphics(tab(2), "../media/static_pos.png");
-% exportgraphics(tab(3), "../media/static_dop.png");
-% exportgraphics(tab(4), "../media/static_pos_enu.png");
-% exportgraphics(tab(5), "../media/static_vel_enu.png");
-% exportgraphics(tab(6), "../media/static_geo_toomers.png");
-% exportgraphics(tab(7), "../media/dynamic_pos.png");
-% exportgraphics(tab(8), "../media/dynamic_dop.png");
-% exportgraphics(tab(9), "../media/dynamic_vel_course.png");
-% exportgraphics(tab(10), "../media/dynamic_clock.png");
-% exportgraphics(tab(11), "../media/lab1_skyplot.png");
+exportgraphics(tab(1), "../media/static_skyplot.png");
+exportgraphics(tab(2), "../media/static_pos.png");
+exportgraphics(tab(3), "../media/static_dop.png");
+exportgraphics(tab(4), "../media/static_pos_enu.png");
+exportgraphics(tab(5), "../media/static_vel_enu.png");
+exportgraphics(tab(6), "../media/static_geo_toomers.png");
+exportgraphics(tab(7), "../media/dynamic_pos.png");
+exportgraphics(tab(8), "../media/dynamic_dop.png");
+exportgraphics(tab(9), "../media/dynamic_vel_course.png");
+exportgraphics(tab(10), "../media/dynamic_clock.png");
+exportgraphics(tab(11), "../media/lab1_skyplot.png");

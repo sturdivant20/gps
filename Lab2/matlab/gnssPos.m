@@ -37,8 +37,8 @@ error = Inf;
 i = 0;
 
 % least squares iterations
-while (error > min(psr_var.^2)*1e-3) && (i < 10)
-% while error > 1e-6
+% while (error > min(psr_var.^2)*1e-3) && (i < 10)
+while (error > 1e-6) && (i < 10)
     i = i + 1;
     u = x_sv - x_hat(1:3)';
     r = sqrt(sum(u.^2,2));

@@ -121,7 +121,7 @@
   \solution
   Satellite positions were determined by using the calc\_gps\_sv\_pos function 
   given on the class website. This function takes in given ephemeris data, a GPS 
-  transmit time and a calculated transit time. The transit and transmit time was 
+  transmit time and a calculated transit time. The transit and transmit time were 
   calculated with the following equations:
   \begin{equation*}
     \begin{split}
@@ -181,7 +181,7 @@
     DOP = inv(H'*H);
     end    
   \end{lstlisting}
-  Using the code an initial receiver position was found to be: 
+  Using the code, an initial receiver position was found to be: 
   \begin{equation*}
     \begin{split}
       x \:\si{[m]} &= 
@@ -194,7 +194,9 @@
       \end{bmatrix}
     \end{split}
   \end{equation*}
-  Plotting the position for the first 914 seconds of the static data:
+  In the static data there was a time jump of about 5 minutes after 914 seconds. This itself 
+  would not be an issue but there was an extra second added at index number 1067 which had 
+  to be accounted for. Plotting the position output with these adjustments:
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{static_pos.png}
@@ -204,25 +206,24 @@
   building. There does seem to be some wander on the position measurements, as 
   two line segments are formed by the position measurements drifting over time. 
   However, this drift is limited to less than a few meters of error. Exact ENU 
-  positions were calculated with Toomer's Corner as a reference position. 
+  positions were calculated with Toomer's Corner as a reference position. The position 
+  jump between approximately 900 and 1200 seconds is also apparent.
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{static_pos_enu.png}
     \caption{ENU Position Relative to Toomer's Corner.}
   \end{figure}
   Based on the ENU positions it can be seen that the positions errors remain 
-  less than a meters until a satellite is lost at 600 seconds. The plots of 
-  the DOP also show this jump in position error.
+  less than a few meters until a satellite is lost at 600 seconds and again between 
+  1400 and 1500 seconds. The plots of the DOP below also show this jump in position error.
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{static_dop.png}
     \caption{Static Receiver Dilution of Precision.}
   \end{figure}
-  The PDOP shows that the position error should be within 1.5 meters and is 
-  held relatively constant. The ENU position drift also remains close to this 1.5 
-  meter of error threshold. \\
+  The PDOP shows that the position error be should held relatively constant. \\
 
-  The following is a plot of the ENU velocities:
+  The following is a plot of the ENU velocities which again shows the time jump:
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{static_vel_enu.png}
@@ -270,7 +271,7 @@
     \includegraphics[width=0.7\textwidth]{dynamic_pos.png}
     \caption{Dynamic Receiver Path.}
   \end{figure}
-  Note the two timestamps had erroneous data where there were fewer than four 
+  Note that four timestamps had erroneous data where there were fewer than four 
   satellites in view. These data points were removed from the solution. 
   The data was taken on the streets around Auburn's campus. The path begins 
   and ends at the Auburn MRI building parking lot.\\
@@ -281,21 +282,26 @@
     \includegraphics[width=0.7\textwidth]{dynamic_dop.png}
     \caption{Dilution of Precision for the Dynamic Receiver.}
   \end{figure}
-  The PDOP shows that the position error will remain below 7 meters at all 
-  time points and has a direct correlation to the number of available satellites.
+  The PDOP shows that the position error could remain below 7 meters at all 
+  time points and has a direct correlation to the number of available satellites. 
+  Because the data is dynamic, satellites fall out of view more often so the number 
+  of satellites in use is much more sporadic.
 
-  The plots for speed and course is shown below:
+  The plots for speed and course are shown below:
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{dynamic_vel_course.png}
     \caption{Speed and Course of Receiver.}
   \end{figure}
-  As seen in the plot, the velocity does not remain smooth throughout the 
-  run. The velocity spikes to a unreasonable values multiple times. The general 
-  course can be followed, but is highly dependent on the velocity so it shows the 
-  same erroneous spikes. \\
+  The velocity had many erroneous spikes (of extremly high velocity) caused by bad 
+  doppler measurements. Therefore, any velocities over 58 mph ($\sim$26 m/s) were discarded 
+  as shown by the blue line. The spaces between these points were linearly interpolated 
+  to fill in the gaps as shown by the red line. After correcting this, the velocities 
+  never went above about 45 mph. The course was then calculated as a function of the east and 
+  north velocities. The graph of course looks as expected with a clear path while moving, 
+  and noisy values while stopped. \\
 
-  The clock bias and drift is plotted below:
+  The clock bias and drift are plotted below:
   \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{dynamic_clock.png}
@@ -303,8 +309,10 @@
   \end{figure}
   The clock bias constantly decreases to $-1.5(10^5)$ where is gets wrapped back 
   around to $+1.5(10^5)$. If you were to plot the raw pseudoranges for this data 
-  set they follow this same pattern. The clock drift remains close to zero, but 
-  once again shows spikes that correspond to the spikes in velocity.
+  set they follow this same pattern. The clock drift (another function of velocity) 
+  was also filtered by the removing the points of high velocities and interpolating 
+  in the gaps. As shown, it increases in magnitude over time, which is to be expected 
+  due to poor doppler measurements degrading the solution.
 
   \item Bonus from LAB 1.
   \begin{enumerate}[(a)]
