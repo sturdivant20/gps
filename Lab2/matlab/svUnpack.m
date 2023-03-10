@@ -7,6 +7,9 @@ svData = cell(L,1);
 for i = 1:L
     % determine usable satellites
     svInUse = ~isnan(struct.measurements.L1.psr(i,:));
+    if(i == 121)
+        i
+    end
 
     % only parse if there are at least 4 SV
     if sum(svInUse) > 3
@@ -64,6 +67,7 @@ for i = 1:L
     %     svData{i}.az = svData{i}.az(elMask);
     %     svData{i}.el = svData{i}.el(elMask);
     
+
         % create user positions and velocities
         [svData{i}.x,svData{i}.b,svData{i}.P,svData{i}.DOP,svData{i}.i] = ...
             gnssPos(svData{i}.pos, svData{i}.psr_corr, 0.5);

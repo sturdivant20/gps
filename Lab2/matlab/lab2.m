@@ -19,7 +19,9 @@ tab(11) = uitab(Title="11) Lab1 SkyPlot");
 
 % constants
 load('RCVR_S1_data.mat');
+load('RCVR_S2_data.mat');
 load('RCVR_D1_data.mat');
+load('RCVR_D2_data.mat');
 c = 299792458;  % speed of light
 
 %% PART 1 - STATIC
@@ -37,7 +39,8 @@ RotMat = [-sind(lon0), -sind(lat0)*cosd(lon0), cosd(lat0)*cosd(lon0);
            0         ,  cosd(lat0)           , sind(lon0)];
 
 % unpack sv data and user position
-svData1 = svUnpack(RCVR_S1, true);
+svData1 = svUnpack(RCVR_D2, true);
+% svData1 = svUnpack(RCVR_D2, true);
 
 L = length(svData1);
 az = NaN(30,L);
@@ -320,6 +323,8 @@ xlim([0,L]);
 % figure
 % % plot(time, ve, time, vn, time ,vu)
 % plot(time, xDot(:,1), time, xDot(:,2), time ,xDot(:,3))
+figure
+plot3(x(:,1), x(:,2), x(:,3))
 
 
 %% PART 3 - LAB1 EPHEMERIS
