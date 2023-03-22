@@ -680,6 +680,6 @@ ylim([0, 120])
 % exportgraphics(tab(7), "./media/7a.png")
 % exportgraphics(tab(8), "./media/7b.png")
 % exportgraphics(tab(9), "./media/7c.png")
-exportgraphics(tab(10), "./media/8.png")
+% exportgraphics(tab(10), "./media/8.png")
 
 
