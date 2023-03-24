@@ -7,11 +7,7 @@ svData = cell(L,1);
 for i = 1:L
     % determine usable satellites
     svInUse_L1 = ~isnan(struct.measurements.L1.psr(i,:));
-    if strcmp(mode, 'sta')
-        svInUse_L2 = ~isnan(struct.measurements.L2.psr(i,:));
-    elseif strcmp(mode, 'dyn')
-        svInUse_L2 = ~isnan(struct.measurements.L2.doppler(i,:));
-    end
+    svInUse_L2 = ~isnan(struct.measurements.L2.psr(i,:));
 
     % only parse if there are at least 4 SV
     if sum(svInUse_L1) > 3
@@ -26,13 +22,15 @@ for i = 1:L
         svData{i}.gpsTime = struct.GPS_time.seconds(i);
         svData{i}.ephemeris = reshape(cell2mat(struct2cell(struct.ephem(svData{i}.svInUse))), [], length(svData{i}.svInUse))';
         svData{i}.L1_psr = struct.measurements.L1.psr(i,svData{i}.svInUse)';
+        svData{i}.L1_psr_var = struct.measurements.L1.psr_variance(i,svData{i}.svInUse)';
         svData{i}.L1_dopp = struct.measurements.L1.doppler(i,svData{i}.svInUse)' .* -(c/1575.42e6); % Hz to m/s
         svData{i}.L1_car = struct.measurements.L1.carrier_phase(i,svData{i}.svInUse)';
-        if strcmp(mode, 'sta')
-            svData{i}.L2_psr = struct.measurements.L2.psr(i,svData{i}.svInUse)';
-        end
+        svData{i}.L1_car_var = struct.measurements.L1.carrier_phase_variance(i,svData{i}.svInUse)';
+        svData{i}.L2_psr = struct.measurements.L2.psr(i,svData{i}.svInUse)';
+        svData{i}.L2_psr_var = struct.measurements.L2.psr_variance(i,svData{i}.svInUse)';
         svData{i}.L2_dopp = struct.measurements.L2.doppler(i,svData{i}.svInUse)' .* -(c/1227.60e6); % Hz to m/s
         svData{i}.L2_car = struct.measurements.L2.carrier_phase(i,svData{i}.svInUse)';
+        svData{i}.L2_car_var = struct.measurements.L2.carrier_phase_variance(i,svData{i}.svInUse)';
   
         % create sv positions
         for j = 1:length(svData{i}.svInUse)
