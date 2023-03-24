@@ -2,6 +2,15 @@
 clc; clear; close all;
 fprintf("<strong>PART 3\n</strong>");
 
+f = figure('units','normalized','position',[0.1 0.1 0.8 0.8]);
+tbs = uitabgroup(Parent=f);
+tab(1) = uitab("A", Parent=tbs);
+tab(2) = uitab("B", Parent=tbs);
+tab(3) = uitab("C", Parent=tbs);
+tab(4) = uitab("D", Parent=tbs);
+tab(5) = uitab("E", Parent=tbs);
+tab(6) = uitab("F", Parent=tbs);
+
 c = 299792458;  % speed of light
 L1 = 1575.42e6;
 L2 = 1227.60e6;
@@ -149,7 +158,7 @@ a_dist(:,k1|k2) = [];
 a_mu = mean(a_dist);
 a_std = std(a_dist);
 
-figure();
+ax = geoaxes(Parent=tab(1));
 geoplot(a_lla1(1,:), a_lla1(2,:), 'o', LineWidth=2.5);
 hold on;
 geoplot(a_lla2(1,:), a_lla2(2,:), 'x', LineWidth=2.5);
@@ -231,7 +240,7 @@ b_std = std(b_dist);
 b_mu2 = mean(b_dist2);
 b_std2 = std(b_dist2);
 
-figure();
+ax = geoaxes(Parent=tab(2));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o', LineWidth=2.5);
 hold on;
 geoplot(b_lla(1,:), b_lla(2,:), 'x', LineWidth=2.5);
@@ -334,7 +343,7 @@ c_std2 = std(c_dist(2,:));
 c_mu3 = mean(c_dist(3,:));
 c_std3 = std(c_dist(3,:));
 
-figure();
+ax = geoaxes(Parent=tab(3));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o', LineWidth=2.5);
 hold on;
 geoplot(c_lla(1,:,1), c_lla(2,:,1), 'x', LineWidth=3.5);
@@ -462,7 +471,7 @@ d_dist(:,kk) = [];
 d_mu = mean(d_dist);
 d_std = std(d_dist);
 
-figure();
+ax = geoaxes(Parent=tab(4));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o');
 hold on;
 geoplot(d_lla(1,:), d_lla(2,:), 'x');
@@ -496,7 +505,7 @@ course = wrapTo360(atan2d(VE1 , VN1));
 % course(speed < 2) = 0;
 psi = wrapTo360(atand((E2-E1) ./ (N2-N1))-15);
 
-figure();
+ax = axes(Parent=tab(5));
 hold on;
 plot(course,'.b', LineWidth=2);
 plot(psi,'r', LineWidth=2);
@@ -507,7 +516,7 @@ legend("Course", "Azimuth");
 
 
 %% dist plot
-figure();
+ax = axes(Parent=tab(6));
 hold on;
 plot(a_dist, 'o', LineWidth=2.5);
 plot(b_dist, 'o', LineWidth=1.5);
@@ -520,4 +529,12 @@ legend("A", "B", "C 2 MIN", "C 8 MIN", "C 15 MIN", "D", "B Recursive")
 title("Dynamic Receiver Positioning Difference")
 xlabel("Time [s]");
 ylabel("Position Difference [m]");
+
+%%
+% exportgraphics(tab(1), "./media/p3_a.png");
+% exportgraphics(tab(2), "./media/p3_b.png");
+% exportgraphics(tab(3), "./media/p3_c.png");
+% exportgraphics(tab(4), "./media/p3_d.png");
+% exportgraphics(tab(5), "./media/p3_e.png");
+% exportgraphics(tab(6), "./media/p3_comp.png");
 

@@ -2,6 +2,13 @@
 clc; clear; close all;
 fprintf("<strong>PART 4\n</strong>");
 
+f = figure('units','normalized','position',[0.1 0.1 0.8 0.8]);
+tbs = uitabgroup(Parent=f);
+tab(1) = uitab("A", Parent=tbs);
+tab(2) = uitab("B", Parent=tbs);
+tab(3) = uitab("C", Parent=tbs);
+tab(4) = uitab("D", Parent=tbs);
+
 load("RCVR_S1.mat");
 load("RCVR_D1.mat");
 
@@ -28,7 +35,7 @@ end
 S1 = S1_;
 D1 = D1_;
 
-clearvars -except S1 D1 
+clearvars -except S1 D1 tbs tab
 L = length(D1);
 
 %% Part A
@@ -54,7 +61,7 @@ for i = 1:L
     lla_dyn(:,i) = ecef2lla(x_dyn(:,i)')';
 end
 
-figure()
+ax = geoaxes(Parent=tab(1));
 geoplot(lla_sta(1,:), lla_sta(2,:), 'o', LineWidth=2);
 hold on;
 geoplot(lla_dyn(1,:), lla_dyn(2,:), 'x', LineWidth=2);
@@ -93,7 +100,7 @@ for i = 1:L
     lla_dyn_dgps(:,i) = ecef2lla(x_dyn_dgps(:,i)')';
 end
 
-figure()
+ax = geoaxes(Parent=tab(2));
 geoplot(lla_sta_dgps(1,:), lla_sta_dgps(2,:), 'o', LineWidth=2);
 hold on;
 geoplot(lla_dyn_dgps(1,:), lla_dyn_dgps(2,:), 'x', LineWidth=2);
@@ -105,7 +112,7 @@ title("DGPS Positioning")
 %% plots
 
 % position difference
-figure();
+ax = axes(Parent=tab(3));
 tl = tiledlayout(3,1,"TileSpacing","tight");
 xlabel(tl, "Time [s]");
 ylabel(tl, "Position Difference [m]");
@@ -124,7 +131,7 @@ title("Z");
 grid on;
 
 % geoplot with both
-figure()
+ax = geoaxes(Parent=tab(4));
 geoplot(lla_sta_dgps(1,:), lla_sta_dgps(2,:), 'o', LineWidth=2);
 hold on;
 geoplot(lla_dyn(1,:), lla_dyn(2,:), '^', LineWidth=3);
@@ -132,3 +139,9 @@ geoplot(lla_dyn_dgps(1,:), lla_dyn_dgps(2,:), 'x', LineWidth=1.5);
 legend("Static", "Dynamic", "Dynamic DGPS");
 geobasemap satellite;
 title("Positioning Comparison")
+
+%%
+exportgraphics(tab(1), "./media/p4_a.png");
+exportgraphics(tab(2), "./media/p4_b.png");
+exportgraphics(tab(3), "./media/p4_c.png");
+exportgraphics(tab(4), "./media/p4_d.png");

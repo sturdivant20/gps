@@ -2,6 +2,14 @@
 clc; close all; clear;
 fprintf("<strong>PART 2\n</strong>");
 
+f = figure('units','normalized','position',[0.1 0.1 0.8 0.8]);
+tbs = uitabgroup(Parent=f);
+tab(1) = uitab("A", Parent=tbs);
+tab(2) = uitab("B", Parent=tbs);
+tab(3) = uitab("C", Parent=tbs);
+tab(4) = uitab("D", Parent=tbs);
+tab(5) = uitab("F", Parent=tbs);
+
 c = 299792458;  % speed of light
 L1 = 1575.42e6;
 L2 = 1227.60e6;
@@ -138,7 +146,7 @@ end
 a_mu = mean(a_dist);
 a_std = std(a_dist);
 
-figure();
+ax = geoaxes(Parent=tab(1));
 geoplot(a_lla1(1,:), a_lla1(2,:), 'o');
 hold on;
 geoplot(a_lla2(1,:), a_lla2(2,:), 'x');
@@ -180,7 +188,7 @@ end
 b_mu = mean(b_dist);
 b_std = std(b_dist);
 
-figure();
+ax = geoaxes(Parent=tab(2));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o');
 hold on;
 geoplot(b_lla(1,:), b_lla(2,:), 'x');
@@ -237,7 +245,7 @@ end
 c_mu = mean(c_dist,2);
 c_std = std(c_dist,[],2);
 
-figure();
+ax = geoaxes(Parent=tab(3));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o', LineWidth=5);
 hold on;
 geoplot(c_lla(1,:,1), c_lla(2,:,1), 'x', LineWidth=3);
@@ -324,7 +332,7 @@ for i = 1:r1.L
     d_dist(i) = norm(a_x2(:,i) - d_x(:,i));
 end
 
-figure();
+ax = geoaxes(Parent=tab(4));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o');
 hold on;
 geoplot(d_lla(1,:), d_lla(2,:), 'x');
@@ -340,7 +348,7 @@ fprintf("mean = %f\n", d_mu);
 
 %% distance plot
 
-figure();
+ax = axes(Parent=tab(5));
 hold on;
 plot(1:1987, a_dist, 'o', LineWidth=2.5);
 plot(1:1987, b_dist, 'o', LineWidth=1.5);
@@ -354,4 +362,10 @@ xlabel("Time [s]");
 ylabel("Position Difference [m]");
 
 
+%% 
 
+% exportgraphics(tab(1), "./media/p2_a.png");
+% exportgraphics(tab(2), "./media/p2_b.png");
+% exportgraphics(tab(3), "./media/p2_c.png");
+% exportgraphics(tab(4), "./media/p2_d.png");
+% exportgraphics(tab(5), "./media/p2_comp.png");

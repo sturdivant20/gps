@@ -2,6 +2,14 @@
 clc; close all; clear;
 fprintf("<strong>PART 1\n</strong>");
 
+f = figure('units','normalized','position',[0.1 0.1 0.8 0.8]);
+tbs = uitabgroup(Parent=f);
+tab(1) = uitab("A", Parent=tbs);
+tab(2) = uitab("B", Parent=tbs);
+tab(3) = uitab("C", Parent=tbs);
+tab(4) = uitab("D", Parent=tbs);
+tab(5) = uitab("F", Parent=tbs);
+
 % load("+data/RCVR_S1_data_new2.mat");
 % S1 = utils.svUnpack(RCVR_S1, 'sta');
 % save("RCVR_S1.mat", "S1");
@@ -69,7 +77,7 @@ fprintf("Std [XYZ] = %f, %f, %f\n", a_std);
 % car = car(svInUse,:);
 
 % plot with satellite view
-figure();
+ax = geoaxes(Parent=tab(1));
 geoplot(a_lla(:,1), a_lla(:,2), 'o');
 geobasemap satellite;
 title("Regular Positioning")
@@ -119,7 +127,7 @@ fprintf("Std [XYZ] = %f, %f, %f\n", b_std2);
 fprintf("Mean [LLA] = %f, %f, %f\n", b_mu3);
 fprintf("Std [XYZ] = %f, %f, %f\n", b_std3);
 
-figure();
+ax = geoaxes(Parent=tab(2));
 geoplot(a_lla(:,1), a_lla(:,2), 'o');
 hold on;
 geoplot(b_lla(:,1,1), b_lla(:,2,1), 'x');
@@ -208,7 +216,7 @@ c_mu = mean(c_lla, 1);
 fprintf("Mean [LLA] = %f, %f, %f\n", c_mu);
 fprintf("Std [XYZ] = %f, %f, %f\n", c_std);
 
-figure();
+ax = geoaxes(Parent=tab(3));
 geoplot(a_lla(:,1), a_lla(:,2), 'o');
 hold on;
 geoplot(c_lla(:,1), c_lla(:,2), 'x');
@@ -243,7 +251,7 @@ d_mu = mean(d_lla, 1);
 fprintf("Mean [LLA] = %f, %f, %f\n", d_mu);
 fprintf("Std [XYZ] = %f, %f, %f\n", d_std);
 
-figure();
+ax = geoaxes(Parent=tab(4));
 geoplot(a_lla(:,1), a_lla(:,2), 'o');
 hold on;
 geoplot(d_lla(:,1), d_lla(:,2), 'x');
@@ -261,7 +269,7 @@ fprintf("<strong>\n(e)\n</strong>");
 fprintf("<strong>\n(f)\n</strong>");
 
 % all tests
-figure();
+ax = geoaxes(Parent=tab(5));
 geoplot(a_lla(:,1), a_lla(:,2), 'o', LineWidth=9);
 hold on;
 geoplot(b_lla(:,1,1), b_lla(:,2,1), '^', LineWidth=1.5);
@@ -274,3 +282,10 @@ legend("Regular", "Carrier Smoothed 2 MIN", "Carrier Smoothed 8 MIN", "Carrier S
 title("Positioning Comparison")
 
 
+%% 
+
+% exportgraphics(tab(1), "./media/p1_a.png");
+% exportgraphics(tab(2), "./media/p1_b.png");
+% exportgraphics(tab(3), "./media/p1_c.png");
+% exportgraphics(tab(4), "./media/p1_d.png");
+% exportgraphics(tab(5), "./media/p1_f.png");
