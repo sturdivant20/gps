@@ -12,21 +12,21 @@ tab(5) = uitab("F", Parent=tbs);
 
 % load("+data/RCVR_S1_data_new2.mat");
 % S1 = utils.svUnpack(RCVR_S1, 'sta');
-% save("RCVR_S1.mat", "S1");
+% save("+data/RCVR_S1.mat", "S1");
 % 
 % load("+data/RCVR_S2_data_new2.mat");
 % S2 = utils.svUnpack(RCVR_S2, 'sta');
-% save("RCVR_S2.mat", "S2");
+% save("+data/RCVR_S2.mat", "S2");
 % 
 % load("+data/RCVR_D1_data_new2.mat");
 % D1 = utils.svUnpack(RCVR_D1, 'dyn');
-% save("RCVR_D1.mat", "D1");
+% save("+data/RCVR_D1.mat", "D1");
 % 
 % load("+data/RCVR_D2_data_new2.mat");
 % D2 = utils.svUnpack(RCVR_D2, 'dyn');
-% save("RCVR_D2.mat", "D2");
+% save("+data/RCVR_D2.mat", "D2");
 
-load("RCVR_S1.mat");
+load("+data/RCVR_S1.mat");
 c = 299792458;  % speed of light
 L = length(S1);
 % svInUse = [1, 3, 6, 7, 8, 13, 14, 17, 19, 21, 30];

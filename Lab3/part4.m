@@ -9,8 +9,8 @@ tab(2) = uitab("B", Parent=tbs);
 tab(3) = uitab("C", Parent=tbs);
 tab(4) = uitab("D", Parent=tbs);
 
-load("RCVR_S1.mat");
-load("RCVR_D1.mat");
+load("+data/RCVR_S1.mat");
+load("+data/RCVR_D1.mat");
 
 t1 = zeros(1,length(S1));
 for i = 1:length(S1)

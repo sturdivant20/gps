@@ -17,7 +17,7 @@ L2 = 1227.60e6;
 lambda1 = c / L1;
 lambda2 = c / L2;
 
-load("RCVR_D1.mat");
+load("+data/RCVR_D1.mat");
 r1.L = length(D1);
 
 r1.gpsTime = zeros(r1.L,1);
@@ -49,7 +49,7 @@ for i = 1:r1.L
     r1.L2car_var(svTest,i) = D1{i}.L2_car_var;
 end
 
-load("RCVR_D2.mat");
+load("+data/RCVR_D2.mat");
 r2.L = length(D2);
 
 r2.gpsTime = zeros(r2.L,1);

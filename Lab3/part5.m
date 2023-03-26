@@ -2,8 +2,8 @@
 clc; clear; close all;
 fprintf("<strong>PART 4\n</strong>");
 
-load("RCVR_S1.mat");
-load("RCVR_D1.mat");
+load("+data/RCVR_S1.mat");
+load("+data/RCVR_D1.mat");
 
 t1 = zeros(1,length(S1));
 for i = 1:length(S1)

@@ -22,7 +22,7 @@ T = length(svInUse);
 svInUse_ = zeros(32,1);
 svInUse_(svInUse) = 1;
 
-load("RCVR_S1.mat");
+load("+data/RCVR_S1.mat");
 r1.L = length(S1);
 
 r1.gpsTime = zeros(r1.L,1);
@@ -54,7 +54,7 @@ for i = 1:r1.L
     r1.L2car_var(svInUse,i) = S1{i}.L2_car_var(ismember(svTest, svInUse));
 end
 
-load("RCVR_S2.mat");
+load("+data/RCVR_S2.mat");
 r2.L = length(S2);
 
 r2.gpsTime = zeros(r2.L,1);

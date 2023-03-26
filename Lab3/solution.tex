@@ -11,7 +11,11 @@
 \usepackage[shortlabels]{enumitem}
 \usepackage{subcaption}
 \usepackage{helvet}
+
 \usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 
 \usepackage{siunitx}
 \usepackage{nicefrac}
@@ -102,94 +106,306 @@
 \begin{enumerate}[label=\textbf{\arabic*.}]
   \itemsep 24pt
   \item \textbf{Improved GPS Positioning} \\
-Whether it is noise or an atmospheric disturbances, GPS positioning inherently involves some error. To combat this error, different methods
-can be used to correct the raw measurements. In this section, different methods are used to correct the positioning of a static Novatel receiver. 
-This receiver was located in the Auburn MRI, and data was taken on March 16, 2023 at a 1 Hz sample rate. To start, an initial GPS position 
-solution for the static data set was determined using a Gauss-Newton least squares approach. The least squares equation is given as:
+    Whether it is noise or an atmospheric disturbances, GPS positioning 
+    inherently involves some error. To combat this error, different methods
+    can be used to correct the raw measurements. In this section, different 
+    methods are used to correct the positioning of a static Novatel receiver. 
+    This receiver was located in the Auburn MRI, and data was taken on March 
+    16, 2023 at a 1 Hz sample rate. To start, an initial GPS position solution 
+    for the static data set was determined using a Gauss-Newton least squares 
+    approach. The least squares equation is given as:
     \begin{equation}
-          x =(G^T\ G)^{-1}\ G^T\ y
+      x =(G^T\ G)^{-1}\ G^T\ y
     \end{equation}
-  where \textit{x} is the state vector including the position and clock bias differentials, \textit{G} is the geometry matrix, and \textit{y} is 
-  the difference between the pseudorange and range. To determine the static position solution, only the 8 satellites that had both L1 and L2 
-  pseudoranges for the entire data set were used. This was done so that the amount of satellites used in each solution method would remain 
-  constant. Any improvements in positioning would be a consequence of removing error not removing or adding satellites. Figure 1 gives the position solution for the static data set. 
+    where $x$ is the state vector including the position and clock bias 
+    differentials, $G$ is the geometry matrix, and $y$ is the difference 
+    between the pseudorange and range. To determine the static position 
+    solution, only the 8 satellites that had both L1 and L2 pseudoranges for 
+    the entire data set were used. This was done so that the amount of 
+    satellites used in each solution method would remain constant. Any 
+    improvements in positioning would be a consequence of removing error not 
+    removing or adding satellites. \emph{Figure 1} gives the position solution 
+    for the static data set. 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.7\textwidth]{p1_a.png}
+        \includegraphics[width=0.85\textwidth]{p1_a.png}
         \caption{Static GPS Position Solution.}
     \end{figure}
-  After determining the static GPS position solution carrier phase smoothing was performed to mitigate the measurement noise. Carrier phase smoothing utilizes the relative distance on a less noisy carrier phase measurement to average the pseudorange over a window. The equation for carrier phase smoothing is given as:
+    After determining the static GPS position solution carrier phase smoothing 
+    was performed to mitigate the measurement noise. Carrier phase smoothing 
+    utilizes the relative distance on a less noisy carrier phase measurement 
+    to average the pseudorange over a window. The equation for carrier phase 
+    smoothing is given as:
     \begin{equation}
-        \overline\rho\ (t_i\ )=\dfrac{1}{M}\ \rho(t_i\ )+\dfrac{M-1}{M}(\overline\rho\ (t_i-1)+\phi(t_i\ )-\phi(t_i-1))
+      \bar{\rho}(t_i ) = \dfrac{1}{M} \rho(t_i)+\dfrac{M-1}{M}
+      \left[\bar{\rho}(t_i-1) + \phi(t_i) - \phi(t_i-1)\right]
     \end{equation}
-  where \textit{$\overline\rho$} is the averaged pseudorange, \textit{M} is the averaging window, \textit{$t_i$} is the current time step, and \textit{$\phi$} is the carrier phase. Increasing the averaging window allows for more smoothing but could introduce a bias. Therefore window sizes of 2, 8, and 15 minutes were used as averaging windows and compared against each other. To generate a position solution the same Gauss-Newton least squares method is used but with the averaged pseudorange. Figure 2 shows the carrier phase smoothed GPS position solutions for each averaging window along with the regular GPS position solution. 
+    where $\bar{\rho}$ is the averaged pseudorange, $M$ is the averaging window, 
+    $t_i$ is the current time step, and $\phi$ is the carrier phase. Increasing 
+    the averaging window allows for more smoothing but could introduce a bias. 
+    Therefore window sizes of 2, 8, and 15 minutes were used as averaging windows 
+    and compared against each other. To generate a position solution the same 
+    Gauss-Newton least squares method is used but with the averaged pseudorange. 
+    \emph{Figure 2} shows the carrier phase smoothed GPS position solutions for 
+    each averaging window along with the regular GPS position solution. 
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{p1_b.png}
+      \caption{Carrier Smoothing GPS Position Solution.}
+    \end{figure}
+    From \emph{Figure 2}, it can be seen that increasing the averaging window 
+    tightens the position solution. A smoother pseudorange measurement limits the 
+    amount of variance on the position solution. For the static scenario, an 
+    inclusion of a new bias is not seen for any of the averaging windows. 
+    Therefore, the higher 15 minute averaging window would be the preferred 
+    averaging window.
+    \\ 
+    The next method used to reduce the static position error was implementing an 
+    ephemeris ionosphere error model. This method estimates the atmospheric error 
+    due to the ionosphere and removes it from the pseudorange measurements. The 
+    equation for calculating the ionosphere correction term, taken from the GPS 
+    Interface Control Document is given as:
+    \begin{equation}
+      T_{iono}=
+      \begin{cases}
+        F*\left[5(10^{-9})+AMP(1-\dfrac{x^2}{2}+\dfrac{x^4}{24})\right], & |x|<1.57 \\
+        F*\left[5(10^{-9})\right] & |x|\geq 1.57
+      \end{cases}
+    \end{equation}
+    where $T_{iono}$ is the ionosphere correction term, $F$ is the obliquity 
+    factor, and $x$ is the phase. This ionosphere is subtracted from the 
+    pseudorange, and a new position solution is calculated. \emph{Figure 3} shows 
+    the GPS position solution using the ephemeris ionosphere model correction as 
+    well as the original GPS position solution.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{p1_c.png}
+      \caption{Ephemeris Model Correction GPS Position Solution.}
+    \end{figure}
+    The ephemeris ionosphere model correction did not have much of an effect 
+    on the position solution. This is due to low amounts of ionosphere error 
+    being present in the data set to begin with. Another method of mitigating 
+    the ionosphere error is to use dual frequency to produce ionosphere free 
+    measurements. The error due to the ionosphere differs based on the signal 
+    frequency. By comparing pseudorange measurements at different frequencies, 
+    the error due to the ionosphere can be ascertained. The equation for an 
+    ionosphere free pseudorange is given by:
+    \begin{equation}
+      \rho_{IF} = \dfrac{f_{L1}^2}{(f_{L1}^2-f_{L2}^2)}\rho_{L1} - 
+                  \dfrac{f_{L2}^2}{(f_{L1}^2-f_{L2}^2)}\rho_{L2}
+    \end{equation}
+    where $\rho_{IF}$ is the ionosphere free pseudorange, $f_{L1}$ is the L1 
+    frequency, and $f_{L2}$ is the L2 frequency. This ionospehere free pseudorange 
+    is used to create a new position solution. \emph{Figure 4} shows the GPS 
+    position solution using the dual frequency ionosphere free measurements and 
+    the original position solution. 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.7\textwidth]{p1_b.png}
-        \caption{Carrier Smoothing GPS Position Solution.}
-    \end{figure}
-From figure 2, it can be seen that increasing the averaging window tightens the position solution. A smoother pseudorange measurement limits the amount of variance on the position solution. For the static scenario, an inclusion of a new bias is not seen for any of the averaging windows. Therefore, the higher 15 minute averaging window would be the preferred averaging window. The next method used to reduce the static position error was implementing an ephemeris ionosphere error model. This method estimates the atmospheric error due to the ionosphere and removes it from the pseudorange measurements. The equation for calculating the ionosphere correction term, taken from the GPS Interface Control Document is given as:
-    \begin{equation}
-    T_{iono}=\begin{cases}
-    F*[5\times10^{-9}+AMP(1-\dfrac{x^2}{2}+\dfrac{x^4}{24}), & |x|<1.57]\\
-    F*(5\times10^{-9}) & |x|\geq 1.57
-    \end{cases}
-    \end{equation}
-where \textit{$T_{iono}$} is the ionosphere correction term, \textit{F} is the obliquity factor, and \textit{x} is the phase. This ionosphere is subtracted from the pseudorange, and a new position solution is calculated. Figure 3 shows the GPS position solution using the ephemeris ionosphere model correction as well as the original GPS position solution.
-   \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.7\textwidth]{p1_c.png}
-        \caption{Ephemeris Model Correction GPS Position Solution.}
-    \end{figure}
-The ephemeris ionosphere model correction did not have much of an effect on the position solution. This id due to low amounts of ionosphere error being present in the data set to begin with. Another method of mitigating the ionosphere error is to use dual frequency to produce ionosphere free measurements. The error due to the ionosphere differs based on the signal frequency. By comparing pseudorange measurements at different frequencies, the error due to the ionosphere can be ascertained. The equation for an ionosphere free pseudorange is given by:
-    \begin{equation}
-        \rho_{IF}=\dfrac{f_{L1}^2}{(f_{L1}^2-f_{L2}^2)}\rho_{L1}-\dfrac{f_{L2}^2}{(f_{L1}^2-f_{L2}^2)}\rho_{L2}
-    \end{equation}
-where \textit{$\rho_{IF}$} is the ionosphere free pseudorange, \textit{$f_{L1}$} is the L1 frequency, and \textit{$f_{L2}$} is the L2 frequency. This ionospehere free pseudorange is used to create a new position solution. Figure 4 shows the GPS position solution using the dual frequency ionosphere free measurements and the original position solution. 
-     \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.7\textwidth]{p1_d.png}
+        \includegraphics[width=0.85\textwidth]{p1_d.png}
         \caption{Dual Frequency Ionosphere Free GPS Position Solution.}
     \end{figure}
-From figure 4 it can be seen that the position solution with the ionosphere free measurements moves to a new general location. This is due to the removal of the ionosphere error. However, it is also shown that the new position solution is much more  when compared to the original position solution. Since the error is added from both the L1 and L2 signals, the position solution will show more variance. Each of the static positions solutions are plotted against each other in figure 5. Additionally, table 1 gives the mean position in latitude and longitude as well as the standard deviation of the ECEF positions.
+    From \emph{Figure 4} it can be seen that the position solution with the 
+    ionosphere free measurements moves to a new general location. This is due to 
+    the removal of the ionosphere error. However, it is also shown that the new 
+    position solution is much more  when compared to the original position 
+    solution. Since the error is added from both the L1 and L2 signals, the 
+    position solution will show more variance. Each of the static positions 
+    solutions are plotted against each other in \emph{Figure 5}. Additionally, 
+    \emph{Table 1} gives the mean position in latitude and longitude as well as 
+    the standard deviation of the ECEF positions.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.7\textwidth]{p1_f.png}
+        \includegraphics[width=0.85\textwidth]{p1_f.png}
         \caption{Dual Frequency Ionosphere Free GPS Position Solution.}
     \end{figure}
-    \break
-       \begin{center}
-       \captionof{table}{Statistics for Static Position Solutions}
-            \begin{tabularx}{0.85\textwidth} { 
-            | >{\centering\arraybackslash}X 
-              | >{\centering\arraybackslash}X 
-              | >{\centering\arraybackslash}X 
-              | >{\centering\arraybackslash}X 
-              | >{\centering\arraybackslash}X 
-              | >{\centering\arraybackslash}X  
-              | >{\centering\arraybackslash}X | }
-              \hline            & \textbf{Mean Latitude (\degree)} & \textbf{Mean Longitude (\degree)} & \textbf{X Std (m)} & \textbf{Y Std (m)} & \textbf{Z Std (m)}  \\
-              \hline \textbf{Regular} & 32.586302    & -85.494366      & 0.533176    & 0.651778  & 0.734229 \\
-              \hline \textbf{Carrier Smooth (2min)} & 32.586302 & -85.494366    & 0.509196  & 0.553659   & 0.623999  \\
-              \hline \textbf{Carrier Smooth (8min)} & 32.586303 & -85.494368  & 0.361699 & 0.190694  & 0.318260 \\
-              \hline \textbf{Carrier Smooth (15min)} & 32.586304 & -85.494369  & 0.245047 & 0.252832 & 0.245292   \\
-              \hline \textbf{Ephemeris Ionosphere Model} & 32.586302 & -85.494366 & 0.533176 & 0.651778  & 0.734229  \\
-              \hline \textbf{Dual Frequency Ionosphere Free} & 32.586291 & -85.494367  & 0.945983 & 1.391230 & 1.252064 \\
-              \hline
-    \end{tabularx}
-  \end{center}
+    % \rowcolors{2}{white}{lightgray}
+    \begin{table}[H]
+      \centering
+      \caption{Statistics for Static Position Solutions.}
+      \begin{tabular}{ P{4.25cm}|P{2.5cm} P{2.5cm} P{1.5cm} P{1.75cm} P{1.5cm} }
+          & \boldmath$\mu_{\phi}$ (\degree) & \boldmath$\mu_{\lambda}$ (\degree) & \boldmath$\sigma_{x}$ (m) & \boldmath$\sigma_{y}$ (m) & \boldmath$\sigma_{z}$ (m) \\
+        \hline
+        \textbf{Regular} & \multicolumn{5}{c}{} \\
+        L1 Position & 32.586302 & -85.494366 & 0.533 & 0.651  & 0.734 \\
+        \hline
+        \textbf{Carrier Smoothing} & \multicolumn{5}{c}{} \\
+        2 min & 32.586302 & -85.494366    & 0.509  & 0.553   & 0.624  \\
+        8 min & 32.586303 & -85.494368  & 0.362 & 0.191  & 0.318 \\
+        15 min & 32.586304 & -85.494369  & 0.245 & 0.253 & 0.245 \\
+        \hline
+        \textbf{Ionosphere Correction} & \multicolumn{5}{c}{} \\
+        Ephemeris Model & 32.586302 & -85.494366 & 0.533 & 0.652  & 0.734  \\
+        Dual Frequency & 32.586291 & -85.494367  & 0.946 & 1.391 & 1.252 \\
+      \end{tabular}
+    \end{table}
+    % \\ \\ \\
+    From \emph{Figure 5} and \emph{Table 1} it can be seen that each of the 
+    position solutions are located in a similar location. The only position 
+    solution that is located farther than 1 meter away from the others is the 
+    dual frequency position solution. The dual frequency positioning is on 
+    average about 8 meters away from the original positioning solution. This 
+    is due to the removal of the ionosphere error, which removes a bias in the 
+    measurements. However, this position solution also has the highest standard 
+    deviation. This is due to the noise on the measurements being increased 
+    since two different pseudoranges are used. The positioning solution with 
+    the lowest standard deviation is the carrier smoothed positioning solution 
+    with a 15 minute averaging window. The noise on the measurements was 
+    mitigated using the more precise carrier phase measurements, leading to 
+    less position variance. The ionosphere model position solution has the 
+    least amount of impact on the original solution. The mean and standard 
+    deviation for each position solution are about the same. This is because 
+    the calculated ionosphere correction term for was small for the entire 
+    data set. To remove both the noise and bias on the original position 
+    solution, using a mix of the dual frequency and carrier smoothing methods 
+    would be the most ideal.
 
-  
-  From figure 5 and table 1 it can be seen that each of the position solutions are located in a similar location. The only position solution that is located farther than 1 meter away from the others is the dual frequency position solution. The dual frequency positioning is on average about 8 meters away from the original positioning solution. This is due to the removal of the ionosphere error, which removes a bias in the measurements. However, this position solution also has the highest standard deviation. This is due to the noise on the measurements being increased since two different pseudoranges are used. The positioning solution with the lowest standard deviation is the carrier smoothed positioning solution with a 15 minute averaging window. The noise on the measurements was mitigated using the more precise carrier phase measurements, leading to less position variance. The ionosphere model position solution has the least amount of impact on the original solution. The mean and standard deviation for each position solution are about the same. This is because the calculated ionosphere correction term for was small for the entire data set. To remove both the noise and bias on the original position solution, using a mix of the dual frequency and carrier smoothing methods would be the most ideal.
   \item \textbf{Static Relative DGPS Positioning} \\
-  
+    Differential GPS (DGPS) techniques can utilize the same techniques used in single 
+    receiver positioning. To begin, a single receiver positioning solution was 
+    done using \emph{Equation 1} as a baseline for all DGPS techniques. This is 
+    presented in \emph{Figure 6}. Note that for this entire section, two receivers 
+    were connected to the same antenna, therefore the distance between the receivers 
+    should be 0 meters.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{p2_a.png}
+      \caption{Static Position of Two Receivers.}
+    \end{figure}
+    Next, the DGPS solution was created using RCVR\_S2 as the base station. This was 
+    determined via the linear least squares solution below.
+    \begin{equation}
+      \delta\rho = 
+      \begin{bmatrix}
+        u_x & u_y & u_z & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        r_x \\ r_y \\ r_z \\ c \delta t \\
+      \end{bmatrix}
+    \end{equation}
+    Where $\delta\rho$ is the psuedorange difference between the receivers, $u$ are 
+    the unit vectors of one receiver to the satellites, $r$ are the relative position 
+    vectors from the first receiver to the second, and $c \delta t$ is the clock bias 
+    difference between the receivers. \emph{Figure 7} shows the DGPS solution when using 
+    RCVR\_S2 as the base station.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{p2_b.png}
+      \caption{Static DGPS Solution.}
+    \end{figure}
+    As shown, the DGPS solution is almost identical to the reference solution as the 
+    baseline between them is 0 meters and both receivers are connected to the same 
+    antenna.
+    \\
+    Carrier phase smoothing was again utilized to mitigate the measurement 
+    noise on the pseudorange measurements. This time, however, the psuedorange and 
+    carrier differences between the measurements were used as shown.
+    \begin{equation}
+      \delta\bar{\rho}(t_i) = \dfrac{1}{M} \delta\rho(t_i) + 
+                              \dfrac{M-1}{M} \left[\delta\bar{\rho}(t_{i-1}) + 
+                              \delta\phi(t_i) - \delta\phi(t_{i-1})\right]
+    \end{equation}
+    Sizing widows of 2, 8, and 15 minutes were used and presented in \emph{Figure 8}. 
+    The smoothing attempt on the DGPS solution has no visual impact on the 
+    positioning solution, likely due to the small differences in the measured 
+    psuedoranges  and carrier from the receivers which leads to the smoothing having 
+    minimal effect on the solution.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{p2_c.png}
+      \caption{Static Carrier Smoothed DGPS Solution.}
+    \end{figure}
+    Lastly, a RTK DGPS solution was used to position the two receivers. This utilized 
+    carrier measurements by attempting to first estimate the integer ambiguity seen in 
+    the measurement as shown.
+    \begin{equation}
+      \delta \phi = 
+      \begin{bmatrix}
+        u_x & u_y & u_z & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        r_x \\ r_y \\ r_z \\ c \delta t \\
+      \end{bmatrix}
+      + \lambda \delta N
+      = G \delta r + \lambda \delta N
+    \end{equation}
+    Where $\lambda$ is the carrier wavelength and $\delta N$ is the estimated integer 
+    ambiguity between the receivers. Using the L1 psuedorange measurement along with 
+    the L1 and L2 carrier measurements, the integer ambiguity can be solved for as 
+    follows:
+    \begin{equation}
+      \begin{bmatrix}
+        \delta \rho_{L1} \\ \delta \phi_{L1} \\ \delta \phi_{L2}
+      \end{bmatrix}
+      =
+      G \delta r +
+      \begin{bmatrix}
+        0 & 0 \\ \lambda_{L1} & 0 \\ 0 & \lambda_{L2}
+      \end{bmatrix}
+      \begin{bmatrix}
+        \delta N_{L1} \\ \delta N_{L2}
+      \end{bmatrix}
+    \end{equation}
+    Separating the second half of the equation and solving for the integer ambiguity:
+    \begin{equation}
+      \begin{split}
+        L &= leftnull(G) \\
+        \delta N &= [(L\lambda)^T(L\lambda)]^{-1}(L\lambda)^T Ly \\
+        P_{\delta N} &= [(L\lambda)^T(L\lambda)]^{-1}
+      \end{split}
+    \end{equation}
+    This hand solution is a medium fidelity, potential solution, however, the Lambda method 
+    was employed on this solution to provide an even more accurate solution. This solution 
+    was implemented with the code provided by Delft University. \emph{Figure 9} is a plot of 
+    the RTK DGPS solution from the Lambda method, which again shows little visual improvement 
+    over the reference solution.
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{p2_d.png}
+      \caption{Static RTK DGPS Solution.}
+    \end{figure}
+    The statistics on the position difference between the receivers for each static DGPS method 
+    are tabulated in \emph{Table 2} and shown in \emph{Figure 10}. These were taken on the 
+    distance magnitude between the receivers.
+    % \rowcolors{2}{white}{lightgray}
+    \begin{table}[H]
+      \centering
+      \caption{Statistics for Static DGPS Position Difference.}
+      \begin{tabular}{ P{5cm}|P{3cm} P{3cm} }
+         & \boldmath$\mu$ & \boldmath$\sigma$ \\
+         \hline
+         \textbf{Reference} & \multicolumn{2}{c}{} \\
+         L1 Position & 0.023808 & 0.012676 \\
+         \hline
+         \textbf{DGPS} & \multicolumn{2}{c}{} \\
+         Psuedorange & 0.023808 & 0.012676 \\
+         Carrier RTK & 0.000486 & 0.000309 \\
+         \hline
+         \textbf{Carrier Smoothing DGPS} & \multicolumn{2}{c}{} \\
+         2 min & 0.010486 & 0.006701 \\
+         8 min & 0.006056 & 0.003862 \\
+         15 min & 0.006582 & 0.003554
+      \end{tabular}
+    \end{table}
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.85\textwidth]{p2_comp.png}
+      \caption{DGPS Relative Position Vector Over Time.}
+    \end{figure}
+    As shown by the statistics, the RTK Positioning solution is by far the superior DGPS 
+    positioning method. This is due to the cleanliness of the carrier measurement such that 
+    when using it to position provides an extremely clean solution with little noise. The 
+    mean of this solution is less than $5(10^{-4})$ which is essentially $0$. This carrier 
+    effect is also shown in the carrier smoothing technique as the carrier greatly smooths 
+    out the psuedorange measurements leading their error to be reduced by over 50\%. It is 
+    also apparent that the Code (psuedorange) DGPS solution is the exact same as the 
+    independent receiver positioning. This is likely due to the receiver setup as both are 
+    connected to the same antenna.
 
-  
   \item \textbf{Dynamic Relative DGPS Positioning} \\
-  We did do the bonus here
+    We did do the bonus here
   \item \textbf{LAAS DGPS Positioning} \\
   \item \textbf{WAAS DGPS Positioning} \\
-  Unfinished
+    Unfinished
   
 \end{enumerate}
 
