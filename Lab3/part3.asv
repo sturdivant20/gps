@@ -527,7 +527,7 @@ plot(c_dist(2,:), 'x', LineWidth=2);
 plot(c_dist(3,:), 'x', LineWidth=2);
 plot(d_dist(1,:), 'square', LineWidth=2);
 plot(b_dist2, '^', LineWidth=1);
-legend("Regualr", "Code DGPS", "Carrier Smoothed 2 MIN", "Carrier Smoothed 8 MIN", "Carrier Smoothed 15 MIN", "RTK DGPS", "Code DGPS Recursive")
+legend("Regualr", "", "C 2 MIN", "C 8 MIN", "C 15 MIN", "D", "B Recursive")
 title("Dynamic Receiver Positioning Difference")
 xlabel("Time [s]");
 ylabel("Position Difference [m]");

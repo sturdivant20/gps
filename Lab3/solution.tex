@@ -11,6 +11,7 @@
 \usepackage[shortlabels]{enumitem}
 \usepackage{subcaption}
 \usepackage{helvet}
+\usepackage{hyperref}
 
 \usepackage{tabularx}
 \usepackage[table]{xcolor}
@@ -159,12 +160,14 @@
     inclusion of a new bias is not seen for any of the averaging windows. 
     Therefore, the higher 15 minute averaging window would be the preferred 
     averaging window.
-    \\ 
+    \\ \\
     The next method used to reduce the static position error was implementing an 
     ephemeris ionosphere error model. This method estimates the atmospheric error 
     due to the ionosphere and removes it from the pseudorange measurements. The 
     equation for calculating the ionosphere correction term, taken from the GPS 
-    Interface Control Document is given as:
+    Interface Control Document 
+    (\url{https://eng.auburn.edu/~dmbevly/fund_gps/IonosphereCorrectionAlgorithm.pdf}) 
+    is given as:
     \begin{equation}
       T_{iono}=
       \begin{cases}
@@ -207,12 +210,13 @@
     From \emph{Figure 4} it can be seen that the position solution with the 
     ionosphere free measurements moves to a new general location. This is due to 
     the removal of the ionosphere error. However, it is also shown that the new 
-    position solution is much more  when compared to the original position 
+    position solution is scattered much more when compared to the original position 
     solution. Since the error is added from both the L1 and L2 signals, the 
-    position solution will show more variance. Each of the static positions 
-    solutions are plotted against each other in \emph{Figure 5}. Additionally, 
-    \emph{Table 1} gives the mean position in latitude and longitude as well as 
-    the standard deviation of the ECEF positions.
+    position solution will show more variance. 
+    \\ \\
+    Each of the static positions solutions are plotted against each other in 
+    \emph{Figure 5}. Additionally, \emph{Table 1} gives the mean position in latitude 
+    and longitude as well as the standard deviation of the ECEF positions.
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p1_f.png}
@@ -295,10 +299,11 @@
     As shown, the DGPS solution is almost identical to the reference solution as the 
     baseline between them is 0 meters and both receivers are connected to the same 
     antenna.
-    \\
+    \\ \\
     Carrier phase smoothing was again utilized to mitigate the measurement 
     noise on the pseudorange measurements. This time, however, the psuedorange and 
-    carrier differences between the measurements were used as shown.
+    carrier differences between the measurements were used as shown in 
+    \emph{equation 6}.
     \begin{equation}
       \delta\bar{\rho}(t_i) = \dfrac{1}{M} \delta\rho(t_i) + 
                               \dfrac{M-1}{M} \left[\delta\bar{\rho}(t_{i-1}) + 
@@ -355,17 +360,17 @@
     \end{equation}
     This hand solution is a medium fidelity, potential solution, however, the Lambda method 
     was employed on this solution to provide an even more accurate solution. This solution 
-    was implemented with the code provided by Delft University. \emph{Figure 9} is a plot of 
-    the RTK DGPS solution from the Lambda method, which again shows little visual improvement 
-    over the reference solution.
+    was implemented with the code provided by Delft University. \emph{Figure 9} is a plot 
+    of the RTK DGPS solution from the Lambda method, which again shows little visual 
+    improvement over the reference solution.
     \begin{figure}[H]
       \centering
       \includegraphics[width=0.85\textwidth]{p2_d.png}
       \caption{Static RTK DGPS Solution.}
     \end{figure}
-    The statistics on the position difference between the receivers for each static DGPS method 
-    are tabulated in \emph{Table 2} and shown in \emph{Figure 10}. These were taken on the 
-    distance magnitude between the receivers.
+    The statistics on the position difference between the receivers for each static DGPS 
+    method are tabulated in \emph{Table 2} and shown in \emph{Figure 10}. These were taken 
+    on the distance magnitude between the receivers.
     % \rowcolors{2}{white}{lightgray}
     \begin{table}[H]
       \centering
@@ -391,101 +396,209 @@
       \includegraphics[width=0.85\textwidth]{p2_comp.png}
       \caption{DGPS Relative Position Vector Over Time.}
     \end{figure}
-    As shown by the statistics, the RTK Positioning solution is by far the superior DGPS 
-    positioning method. This is due to the cleanliness of the carrier measurement such that 
-    when using it to position provides an extremely clean solution with little noise. The 
-    mean of this solution is less than $5(10^{-4})$ which is essentially $0$. This carrier 
-    effect is also shown in the carrier smoothing technique as the carrier greatly smooths 
-    out the psuedorange measurements leading their error to be reduced by over 50\%. It is 
-    also apparent that the Code (psuedorange) DGPS solution is the exact same as the 
-    independent receiver positioning. This is likely due to the receiver setup as both are 
-  \item \textbf{Dynamic Relative DGPS Positioning} \\
-The same DGPS solutions that were evaluated for the static receivers were then performed with two dynamic receivers. The original GPS position solutions for both receivers were plotted against each other in \emph{figure 11}. The original GPS positions solutions were found using the least squares method discussed in \emph{equation 1}. 
-    \begin{figure}[H]
+    As shown by the statistics, the RTK Positioning solution is by far the superior static 
+    DGPS positioning method. This is due to the cleanliness of the carrier measurement 
+    such that when using it to position provides an extremely clean solution with little 
+    noise. The mean of this solution is less than $5(10^{-4})$ which is essentially $0$. 
+    This carrier effect is also shown in the carrier smoothing technique as the carrier 
+    greatly smooths out the psuedorange measurements leading their error to be reduced by 
+    over 50\%. It is also apparent that the Code (psuedorange) DGPS solution is the exact 
+    same as the independent receiver positioning. This is likely due to the receiver setup 
+    as both are receiving measurements via the same antenna.
+  
+    \item \textbf{Dynamic Relative DGPS Positioning} \\
+      The same DGPS solutions that were evaluated for two static receivers were then 
+      performed with two dynamic receivers. This time however, each receiver had their own 
+      antenna and had a static distance of 50 inches (1.27 meters) between them. Also note, 
+      for the dynamic DGPS solutions, there were a few occurrences where both receivers did 
+      not have a common 4 satellites in view, which were removed from the simulation. The 
+      original GPS position solutions for both receivers were plotted against each other in 
+      \emph{Figure 11}. The original GPS positions solutions were found using the least 
+      squares method discussed in \emph{equation 1}. 
+      \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p3_a.png}
         \caption{Original Dynamic GPS Position Solutions.}
-    \end{figure}
- Without using any form of DGPS the difference in position solutions between the two receivers is somewhat large. The position difference between the two receivers should only be 1.27 meters apart, but the mean position difference is over 7 meters. To eliminate this error and variance different methods of DGPS positioning are performed with the second receiver acting as the base. To start, code DGPS is performed using \emph{equation 5}. The code DGPS solution was also performed recursively to reduce spikes in error. In recursive estimation, the covariance matrix is maintained across time epochs. The position solution for both code DGPS positions are shown on \emph{Figure 12} alongside the original dynamic position solution.
-  \begin{figure}[H]
+      \end{figure}
+      Without using any form of DGPS the difference in position solutions between the two 
+      receivers is somewhat large. The position difference between the two receivers should 
+      only be 1.27 meters apart, but the mean position difference is over 7 meters. To 
+      eliminate this error and variance different methods of DGPS positioning are performed 
+      with the second receiver acting as the base. 
+      \\ \\
+      To start, code DGPS is performed using \emph{equation 5}. In addition to this, since 
+      the distance between the receivers is static, the least squares solution for the 
+      distance between the receivers was performed recursively to reduce spikes in error. 
+      In recursive estimation, the covariance matrix is maintained across time epochs 
+      leading to any new information being smoothed out by the uncertainty of prior 
+      measurements along with the uncertainty of the new measurement. The position solution 
+      for both code DGPS positions are shown on \emph{Figure 12} alongside the original 
+      dynamic position solution.
+      \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p3_b.png}
         \caption{Dynamic Code DGPS Position Solution.}
-    \end{figure}
-Implementing code DGPS significantly decreases the difference between the receivers. Any error due to the atmosphere are removed from the pseudorange measurements. Additionally, recursive DGPS decreased the position error even more with a 1.6 meters of position difference and a 0.4 meter standard deviation. Recursive estimation combats areas of bad measurements by using the prior time epochs covariance matrix. Carrier phase smoothing DGPS was then performed on the dynamic data using \emph{equation 6}. Averaging windows of 2, 8, and 15 minutes were evaluated as potential time windows. Averaging was done with any satellite available for each time step. \emph{Figure 13} gives the carrier phase DGPS dynamic position solution plotted against the original position solution.
-     \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.85\textwidth]{p3_c.png}
-            \caption{Dynamic Carrier Phase Smoothed DGPS.}
-        \end{figure}
-Each of the carrier phase smoothed DGPS position solutions decreased the amount of range error in the measurements. Additionally, increasing the averaging window decreased the amount of variance on the measurements. With the 15 minute averaging window never introduced a bias on the measurements, so it was the preferred averaging window. Using the more precise carrier measurements mitigated the noise on the pseudorange measurements. A RTK DGPS position was then computed using \emph{equations 7-9}. The integer ambiguities were approximated using the Lambda method to increase fidelity. \emph{Figure 14} gives the dynamic RTK DGPS position solution. Measurements were used at time epochs where there were measurements available for both the L1 and L2 frequencies.
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.85\textwidth]{p3_d.png}
-            \caption{Dynamic RTK DGPS.}
-        \end{figure}
-The RTK DGPS solution improved the range error. Using the more precise carrier phase measurement mitigates the noise on the measurements. Additionally, the DGPS removes the atmospheric error. However, the RTK DGPS sometimes spikes in error. This is due to the integer ambiguities being imprecise to measure when measurements are corrupted. Additionally, some carrier phase measurements has to be thrown out when the difference between measurements drastically increased. \emph{Figure 15} shows the range error for each DGPS method over time. Additionally, \emph{Table 3} shows the mean and standard deviation of the ranging errors for each DGPS position solution.
-     \begin{table}[H]
+      \end{figure}
+      Implementing code DGPS significantly decreases the difference between the receivers. 
+      Any error due to the atmosphere are removed from the pseudorange measurements. 
+      Additionally, recursive DGPS decreased the position error even more with a 1.6 meters 
+      of position difference and a 0.4 meter standard deviation. Recursive estimation combats 
+      areas of bad measurements by using the prior time epochs covariance matrix. 
+      \\ \\
+      Carrier phase smoothing DGPS was then performed on the dynamic data using 
+      \emph{equation 6}. Averaging windows of 2, 8, and 15 minutes were evaluated as 
+      potential time windows. Averaging was done with any satellite available for each time 
+      step. Each satellite was individually smoothed while in view and smoothing was 
+      restarted any time the satellite left view. \emph{Figure 13} gives the carrier phase 
+      smoothing DGPS dynamic position solution plotted against the original position 
+      solution.
+      \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.85\textwidth]{p3_c.png}
+        \caption{Dynamic Carrier Phase Smoothed DGPS.}
+      \end{figure}
+      Each of the carrier phase smoothed DGPS position solutions decreased the amount of 
+      range error in the measurements. Additionally, increasing the averaging window 
+      decreased the amount of variance on the measurements. The 15 minute averaging 
+      window never introduced a bias on the measurements, so it was the preferred averaging 
+      window. Using the more precise carrier measurements mitigated the noise on the 
+      pseudorange measurements. 
+      \\ \\
+      A RTK DGPS position was then computed using \emph{equations 7-9}. The integer 
+      ambiguities were approximated using the Lambda method to increase fidelity. 
+      \emph{Figure 14} gives the dynamic RTK DGPS position solution. Measurements were used 
+      at time epochs where there were measurements available for both the L1 and L2 
+      frequencies.
+      \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.85\textwidth]{p3_d.png}
+        \caption{Dynamic RTK DGPS.}
+      \end{figure}
+      The RTK DGPS solution improved the range error. Using the more precise carrier phase 
+      measurement mitigates the noise on the measurements. Additionally, the DGPS removes 
+      the atmospheric error. However, the RTK DGPS sometimes spikes in error. This is due to 
+      the integer ambiguities being imprecise to measure when measurements are corrupted. 
+      Additionally, some carrier phase measurements has to be thrown out when the difference 
+      between measurements drastically increased. 
+      \\ \\
+      \emph{Figure 15} shows the range error for each DGPS method over time. \emph{Table 3} 
+      shows the mean and standard deviation of the ranging errors for each DGPS position 
+      solution.
+      % \rowcolors{2}{white}{lightgray}
+      \begin{table}[H]
+        \centering
+        \caption{Statistics for Static DGPS Position Difference.}
+        \begin{tabular}{ P{5cm}|P{3cm} P{3cm} }
+          & \boldmath$\mu (m)$ & \boldmath$\sigma (m)$ \\
+          \hline
+          \textbf{Reference} & \multicolumn{2}{c}{} \\
+          L1 Position & 6.476002 & 7.177811 \\
+          \hline
+          \textbf{DGPS} & \multicolumn{2}{c}{} \\
+          Psuedorange & 4.452806 & 4.452806 \\
+          Recursive & 1.627683 & 0.413855 \\
+          Carrier RTK & 4.452835 & 4.755819 \\
+          \hline
+          \textbf{Carrier Smoothing DGPS} & \multicolumn{2}{c}{} \\
+          2 min & 4.452806 & 4.750667 \\
+          8 min & 3.941766 & 3.114561 \\
+          15 min & 3.361717 & 2.972168
+        \end{tabular}
+      \end{table}
+      \begin{figure}[H]
           \centering
-          \caption{Statistics for Static DGPS Position Difference.}
-          \begin{tabular}{ P{5cm}|P{3cm} P{3cm} }
-             & \boldmath$\mu (m)$ & \boldmath$\sigma (m)$ \\
-             \hline
-             \textbf{Reference} & \multicolumn{2}{c}{} \\
-             L1 Position & 6.476002 & 7.177811 \\
-             \hline
-             \textbf{DGPS} & \multicolumn{2}{c}{} \\
-             Psuedorange & 4.452806 & 4.452806 \\
-             Recursive & 1.627683 & 0.413855 \\
-             Carrier RTK & 4.452835 & 4.755819 \\
-             \hline
-             \textbf{Carrier Smoothing DGPS} & \multicolumn{2}{c}{} \\
-             2 min & 4.452806 & 4.750667 \\
-             8 min & 3.941766 & 3.114561 \\
-             15 min & 3.361717 & 2.972168
-          \end{tabular}
-    \end{table}
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.85\textwidth]{p3_comp.png}
-            \caption{Range Error Comparison of Dynamic DGPS.}
-        \end{figure}
-        % \rowcolors{2}{white}{lightgray}
-From the figure and table it is shown that the recursive code DGPS is the optimal method or error mitigation for the dynamic data set. It had the lowest mean range error, and also displayed the least amount of variance. DGPS eliminates the atmospheric error while the recursive elements smooth the results. The 8 and 15 minute carrier smoothing position solution also gave solutions with low range error and variance. The cleaner carrier phase measurements helped to control the noise on the pseudorange measurements while also getting the added effects if DGPS. While every method reduced the range error, the normal code DGPS, RTK DGPS, and 2 minute carrier smoothed solution experienced considerable variance. In each of these methods, there was no control on the noise of the measurements. Since the data was taken while moving, the quality of the measurements was inherently worse. It should also be noted that the integer ambiguity estimated for the RTK DGPS solution was sporadic due to poor quality measurements. DGPS was also used to deduce the vehicle attitude during the run. The equation to solve for the azimuth using DGPS is given as:
-    \begin{equation}
-        \psi=tan^{-1}{\dfrac{\delta E}{\delta N}}
-    \end{equation}
-where $\psi$ is the azimuth, $\delta E$ is the east distance between the two receivers, and $\delta N$ is the north distance between the two receivers. The distance between the two receivers is the calculated rpv using the recursive code DGPS. This DGPS solution method was used because it displayed the most accurate results for the dynamic scenario. The calculate azimuth was plotted against the GPS course in \emph{figure 16}. To math the frames, the azimuth was rotated by 15 degrees.
-     \begin{figure}[H]
+          \includegraphics[width=0.85\textwidth]{p3_comp.png}
+          \caption{Range Error Comparison of Dynamic DGPS.}
+      \end{figure}
+      From the figure and table it is shown that the recursive code DGPS is the optimal 
+      method or error mitigation for the dynamic data set. It had the lowest mean range 
+      error, and also displayed the least amount of variance. DGPS eliminates the atmospheric 
+      error while the recursive elements smooth the results since the distance between the 
+      receivers should remain constant. The 8 and 15 minute carrier 
+      smoothing position solution also gave solutions with low range error and variance. The 
+      cleaner carrier phase measurements helped to control the noise on the pseudorange 
+      measurements while also getting the added effects if DGPS. While every method reduced 
+      the range error, the normal code DGPS, RTK DGPS, and 2 minute carrier smoothed solution 
+      experienced considerable variance. In each of these methods, there was no control on 
+      the noise of the measurements. Since the data was taken while moving, the quality of 
+      the measurements was inherently worse. It should also be noted that the integer 
+      ambiguity estimated for the RTK DGPS solution was sporadic due to poor quality 
+      measurements. 
+      \\ \\
+      DGPS was also used to deduce the vehicle attitude during the run. The equation to 
+      solve for the azimuth using DGPS is given as:
+      \begin{equation}
+        \psi=tan^{-1}\left({\dfrac{\delta E}{\delta N}}\right)
+      \end{equation}
+      where $\psi$ is the azimuth, $\delta E$ is the east distance between the two receivers, 
+      and $\delta N$ is the north distance between the two receivers. The distance between 
+      the two receivers is the calculated relative position vector using the recursive code 
+      DGPS. This DGPS solution method was used because it displayed the most accurate results 
+      for the dynamic scenario. The calculated azimuth was plotted against the GPS course 
+      derived from GPS velocity given in \emph{equation 11} in \emph{figure 16}. To match 
+      the frames as closely as possible, the azimuth was rotated by 15 degrees.
+      \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p3_e.png}
         \caption{Azimuth vs GPS Course.}
-    \end{figure}
-The calculated azimuth roughly matches the GPS course. While the trends are the same, the exact values do no always line up. The bias and variance on the DGPS solution certainly account for some of this error. The course measurements are also heavily predicated on the raw measurements of the base receiver. Corrupted measurements could greatly effect the course solution. Stopped motion also hurts the comparison, as the calculated azimuth will yield results while the GPS course will not. This is due to the GPS course being calculated based on velocity.
-  \item \textbf{LAAS DGPS Positioning} \\
-  In this section, the same DGPS solution techniques explored in previous parts were used, but in a more practical scenario. The position solution for a dynamic receiver is calculated using a static receiver as a base. To start, GPS position solutions were determined for both the static and dynamic receiver. This was done using the least squares method discussed in \emph{equation 1}. \emph{figure 17} shows the standalone position solutions for both receivers. It is important to note that the receiver measurements were time synced using GPS time. 
+      \end{figure}
+      \begin{equation}
+        \psi=tan^{-1}\left({\dfrac{\dot{E}}{\dot{N}}}\right)
+      \end{equation}
+      The calculated azimuth roughly matches the GPS course. While the trends are the same, 
+      the exact values do no always line up. The bias and variance on the DGPS solution 
+      certainly account for some of this error. The course measurements are also heavily 
+      predicated on the raw measurements of the base receiver. Corrupted measurements could 
+      greatly effect the course solution. Stopped motion also hurts the comparison, as the 
+      calculated azimuth will yield results while the GPS course will not. This is due to 
+      the GPS course being calculated based on velocity.
+    
+    \item \textbf{LAAS DGPS Positioning} \\
+      In this section, the same DGPS solution techniques explored in previous parts were 
+      used, but in a more practical scenario. The position solution for a dynamic receiver 
+      is calculated using a static receiver as a base. To start, GPS position solutions were 
+      determined for both the static and dynamic receiver. This was done using the least 
+      squares method discussed in \emph{equation 1}. \emph{Figure 17} shows the standalone 
+      position solutions for both receivers. It is important to note that the receiver 
+      measurements were time synced using GPS time. 
       \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p4_a.png}
         \caption{Standalone GPS Positioning Solutions.}
-    \end{figure}
-From figure 18 it can be seen that the static data was taken at the Auburn MRI building while the dynamic data was taken on a path around Auburn's campus. Code DGPS was then performed between the dynamic and static receivers using \emph{equation 5}. The position solution for this code DGPS is shown on \emph{figure 18}. Additionally, \emph{figure 19} gives the ECEF difference over time between the original and code DGPS dynamic position solutions. 
-  \begin{figure}[H]
+      \end{figure}
+      From \emph{Figure 18} it can be seen that the static data was taken at the Auburn MRI 
+      building while the dynamic data was taken on a path around Auburn's campus. Code DGPS 
+      was then performed between the dynamic and static receivers using \emph{equation 5}. 
+      The position solution for this code DGPS is shown on \emph{Figure 18}. Additionally, 
+      \emph{Figure 19} gives the ECEF difference over time between the original and code 
+      DGPS dynamic position solutions. 
+      \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p4_d.png}
         \caption{Code DGPS Positioning Solution.}
-    \end{figure}
+      \end{figure}
       \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p4_c.png}
         \caption{ECEF Position Difference Over Time.}
-    \end{figure}
-From \emph{figures 19 and 20} it can be seen that the  code DGPS solution closely follows that of the original position solution. The difference in position never goes above 15 meters of difference. This period of largest difference also occurs at beginning of the run during a long period of no movement. In these static scenarios, the code DGPS solution drifts since it has a greater noise component. Most of the differences in positions while moving  between the two methods occurs during turns or periods of terrain blockage. During these instants, the code DGPS solution sticks onto the road as the original position solution drifts away. This can be seen better in \emph{figure 21} where the DGPS position solution stays on the road during tree blockage. It should also be noted that there are greater differences in the y direction than the x direction. This is due to the satellites being more visible in that direction during the run, leading to less drift in that direction.
-    \begin{figure}[H]
+      \end{figure}
+      From \emph{Figures 19 and 20} it can be seen that the  code DGPS solution closely 
+      follows that of the original position solution. The difference in position never 
+      goes above 15 meters of difference. This period of largest difference also occurs at 
+      beginning of the run during a long period of no movement. In these static scenarios, 
+      the code DGPS solution drifts since it has a greater noise component. Most of the 
+      differences in positions while moving  between the two methods occurs during turns or 
+      periods of terrain blockage. During these instants, the code DGPS solution sticks onto 
+      the road as the original position solution drifts away. This can be seen better in 
+      \emph{Figure 21} where the DGPS position solution stays on the road during tree 
+      blockage. It should also be noted that there are greater differences in the 
+      y-direction than the x direction. This is likely due to the satellites being more 
+      visible in that direction during the run, leading to less drift in that direction.
+      \begin{figure}[H]
         \centering
         \includegraphics[width=0.85\textwidth]{p4_e.png}
         \caption{Zoomed in Comparison of Code DGPS and Original Position Solutions.}
-    \end{figure}
+      \end{figure}
 
 \end{enumerate}
 

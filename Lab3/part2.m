@@ -145,6 +145,8 @@ end
 
 a_mu = mean(a_dist);
 a_std = std(a_dist);
+fprintf("std = %f\n", a_std);
+fprintf("mean = %f\n", a_mu);
 
 ax = geoaxes(Parent=tab(1));
 geoplot(a_lla1(1,:), a_lla1(2,:), 'o');
@@ -153,10 +155,7 @@ geoplot(a_lla2(1,:), a_lla2(2,:), 'x');
 legend("RCVR1", "RCVR2");
 geobasemap satellite;
 title("Regular Positioning")
-
-fprintf("std = %f\n", a_std);
-fprintf("mean = %f\n", a_mu);
-
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% PART B
@@ -187,6 +186,8 @@ end
 
 b_mu = mean(b_dist);
 b_std = std(b_dist);
+fprintf("std = %f\n", b_std);
+fprintf("mean = %f\n", b_mu);
 
 ax = geoaxes(Parent=tab(2));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o');
@@ -195,9 +196,7 @@ geoplot(b_lla(1,:), b_lla(2,:), 'x');
 legend("RCVR2", "RCVR1 DGPS");
 geobasemap satellite;
 title("DGPS Positioning")
-
-fprintf("std = %f\n", b_std);
-fprintf("mean = %f\n", b_mu);
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% PART C
@@ -244,6 +243,8 @@ end
 
 c_mu = mean(c_dist,2);
 c_std = std(c_dist,[],2);
+fprintf("std = %f, %f, %f\n", c_std);
+fprintf("mean = %f, %f, %f\n", c_mu);
 
 ax = geoaxes(Parent=tab(3));
 geoplot(a_lla2(1,:), a_lla2(2,:), 'o', LineWidth=5);
@@ -254,9 +255,7 @@ geoplot(c_lla(1,:,3), c_lla(2,:,3), 'x', LineWidth=0.5);
 legend("RCVR2", "RCVR1 2 MIN" , "RCVR1 8 MIN", "RCVR1 15 MIN");
 geobasemap satellite;
 title("Carrier Smoothed DGPS Positioning")
-
-fprintf("std = %f, %f, %f\n", c_std);
-fprintf("mean = %f, %f, %f\n", c_mu);
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% PART D
@@ -339,6 +338,7 @@ geoplot(d_lla(1,:), d_lla(2,:), 'x');
 legend("RCVR2", "RCVR1 RTK DGPS");
 geobasemap satellite;
 title("RTK DGPS Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 d_mu = mean(d_dist,2);
 d_std = std(d_dist,[],2);
@@ -360,6 +360,7 @@ legend("Regular", "Code DGPS", "Carrier Smoothed DGPS 2 MIN", "Carrier Smoothed 
 title("Static Receiver Positioning Difference")
 xlabel("Time [s]");
 ylabel("Position Difference [m]");
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% 

@@ -81,6 +81,7 @@ ax = geoaxes(Parent=tab(1));
 geoplot(a_lla(:,1), a_lla(:,2), 'o');
 geobasemap satellite;
 title("Regular Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% PART B
@@ -136,6 +137,7 @@ geoplot(b_lla(:,1,3), b_lla(:,2,3), 'x');
 legend({'Normal', '2 MIN', '8 MIN', '15 MIN'});
 geobasemap satellite;
 title("Carrier Smoothed Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% PART C
@@ -223,6 +225,7 @@ geoplot(c_lla(:,1), c_lla(:,2), 'x');
 legend({'Normal', 'Iono. Model'});
 geobasemap satellite;
 title("Ionospheric Model Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% PART D
@@ -258,6 +261,7 @@ geoplot(d_lla(:,1), d_lla(:,2), 'x');
 legend({'Normal', 'Dual Freq.'});
 geobasemap satellite;
 title("Dual Frequency Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% PART E
@@ -280,6 +284,7 @@ geoplot(d_lla(:,1), d_lla(:,2), 'x', LineWidth=2.5);
 geobasemap satellite;
 legend("Regular", "Carrier Smoothed 2 MIN", "Carrier Smoothed 8 MIN", "Carrier Smoothed 15 MIN", "Iono. Model", "Dual Freq.")
 title("Positioning Comparison")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% 

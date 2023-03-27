@@ -68,6 +68,7 @@ geoplot(lla_dyn(1,:), lla_dyn(2,:), 'x', LineWidth=2);
 legend("Static", "Dynamic");
 geobasemap satellite;
 title("Standalone Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% Part B
@@ -107,6 +108,7 @@ geoplot(lla_dyn_dgps(1,:), lla_dyn_dgps(2,:), 'x', LineWidth=2);
 legend("Static", "Dynamic");
 geobasemap satellite;
 title("DGPS Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% plots
@@ -129,6 +131,7 @@ nexttile;
 plot(x_dyn(3,:) - x_dyn_dgps(3,:), 'o', LineWidth=2);
 title("Z");
 grid on;
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 % geoplot with both
 ax = geoaxes(Parent=tab(4));
@@ -139,6 +142,8 @@ geoplot(lla_dyn_dgps(1,:), lla_dyn_dgps(2,:), 'x', LineWidth=1.5);
 legend("Static", "Dynamic", "Dynamic DGPS");
 geobasemap satellite;
 title("Positioning Comparison")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
+
 
 %%
 exportgraphics(tab(1), "./media/p4_a.png");
