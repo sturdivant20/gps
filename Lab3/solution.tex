@@ -417,7 +417,12 @@
       squares method discussed in \emph{equation 1}. 
       \begin{figure}[H]
         \centering
-        \includegraphics[width=0.85\textwidth]{p3_a.png}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_a.png}
+        \end{minipage}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_a1.png}
+        \end{minipage}
         \caption{Original Dynamic GPS Position Solutions.}
       \end{figure}
       Without using any form of DGPS the difference in position solutions between the two 
@@ -436,7 +441,12 @@
       dynamic position solution.
       \begin{figure}[H]
         \centering
-        \includegraphics[width=0.85\textwidth]{p3_b.png}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_b.png}
+        \end{minipage}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_b1.png}
+        \end{minipage}
         \caption{Dynamic Code DGPS Position Solution.}
       \end{figure}
       Implementing code DGPS significantly decreases the difference between the receivers. 
@@ -454,7 +464,12 @@
       solution.
       \begin{figure}[H]
         \centering
-        \includegraphics[width=0.85\textwidth]{p3_c.png}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_c.png}
+        \end{minipage}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_c1.png}
+        \end{minipage}
         \caption{Dynamic Carrier Phase Smoothed DGPS.}
       \end{figure}
       Each of the carrier phase smoothed DGPS position solutions decreased the amount of 
@@ -471,7 +486,12 @@
       frequencies.
       \begin{figure}[H]
         \centering
-        \includegraphics[width=0.85\textwidth]{p3_d.png}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_d.png}
+        \end{minipage}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p3_d1.png}
+        \end{minipage}
         \caption{Dynamic RTK DGPS.}
       \end{figure}
       The RTK DGPS solution improved the range error. Using the more precise carrier phase 
@@ -574,15 +594,20 @@
       DGPS dynamic position solutions. 
       \begin{figure}[H]
         \centering
-        \includegraphics[width=0.85\textwidth]{p4_d.png}
-        \caption{Code DGPS Positioning Solution.}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p4_comp.png}
+        \end{minipage}
+        \begin{minipage}[b]{0.49\textwidth}
+          \includegraphics[width=\textwidth]{p4_comp2.png}
+        \end{minipage}
+        \caption{ECEF Position Difference Over Time.}
       \end{figure}
       \begin{figure}[H]
         \centering
-        \includegraphics[width=0.85\textwidth]{p4_c.png}
-        \caption{ECEF Position Difference Over Time.}
+        \includegraphics[width=0.85\textwidth]{p4_diff.png}
+        \caption{WAAS Positioning Differences.}
       \end{figure}
-      From \emph{Figures 19 and 20} it can be seen that the  code DGPS solution closely 
+      From \emph{Figures 18 and 19} it can be seen that the code DGPS solution closely 
       follows that of the original position solution. The difference in position never 
       goes above 15 meters of difference. This period of largest difference also occurs at 
       beginning of the run during a long period of no movement. In these static scenarios, 
@@ -590,15 +615,15 @@
       differences in positions while moving  between the two methods occurs during turns or 
       periods of terrain blockage. During these instants, the code DGPS solution sticks onto 
       the road as the original position solution drifts away. This can be seen better in 
-      \emph{Figure 21} where the DGPS position solution stays on the road during tree 
-      blockage. It should also be noted that there are greater differences in the 
+      the right of \emph{Figure 18} where the DGPS position solution stays on the road during 
+      tree blockage. It should also be noted that there are greater differences in the 
       y-direction than the x direction. This is likely due to the satellites being more 
       visible in that direction during the run, leading to less drift in that direction.
-      \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.85\textwidth]{p4_e.png}
-        \caption{Zoomed in Comparison of Code DGPS and Original Position Solutions.}
-      \end{figure}
+      % \begin{figure}[H]
+      %   \centering
+      %   \includegraphics[width=0.85\textwidth]{p4_e.png}
+      %   \caption{Zoomed in Comparison of Code DGPS and Original Position Solutions.}
+      % \end{figure}
 
 \end{enumerate}
 

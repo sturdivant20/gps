@@ -1,15 +1,21 @@
 %% GPS LAB 3 Part 3 | Daniel Sturdivant & Andrew Weir
 clc; clear; close all;
+addpath(genpath("Lambda"))
+
 fprintf("<strong>PART 3\n</strong>");
 
-f = figure('units','normalized','position',[0.1 0.1 0.8 0.8]);
+% f = figure('units','normalized','position',[0.1 0.1 0.8 0.8]);
+f = figure(Units='normalized', Position=[1.1, 0.5, 0.8, 0.4]);
+% f = figure(Units='normalized', Position=[1.1, 0.5, 1.3, 0.4]);
 tbs = uitabgroup(Parent=f);
-tab(1) = uitab("A", Parent=tbs);
-tab(2) = uitab("B", Parent=tbs);
-tab(3) = uitab("C", Parent=tbs);
-tab(4) = uitab("D", Parent=tbs);
-tab(5) = uitab("E", Parent=tbs);
-tab(6) = uitab("F", Parent=tbs);
+tab(1) = uitab(Title="A", Parent=tbs);
+tab(2) = uitab(Title="A1", Parent=tbs);
+tab(3) = uitab(Title="B", Parent=tbs);
+tab(4) = uitab(Title="B1", Parent=tbs);
+tab(5) = uitab(Title="C", Parent=tbs);
+tab(6) = uitab(Title="C1", Parent=tbs);
+tab(7) = uitab(Title="D", Parent=tbs);
+tab(8) = uitab(Title="D1", Parent=tbs);
 
 c = 299792458;  % speed of light
 L1 = 1575.42e6;
@@ -161,11 +167,21 @@ fprintf("std = %f\n", a_std);
 fprintf("mean = %f\n", a_mu);
 
 ax = geoaxes(Parent=tab(1));
-geoplot(a_lla1(1,:), a_lla1(2,:), 'o', LineWidth=2.5);
+geoplot(a_lla1(1,:), a_lla1(2,:), 'co', LineWidth=2.5);
 hold on;
 geoplot(a_lla2(1,:), a_lla2(2,:), 'x', LineWidth=2.5);
-legend("RCVR1", "RCVR2");
+legend("RCVR1", "RCVR2", Location="northwest");
 geobasemap satellite;
+title("Regular Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
+
+ax = geoaxes(Parent=tab(2));
+geoplot(a_lla1(1,:), a_lla1(2,:), 'co', LineWidth=2.5);
+hold on;
+geoplot(a_lla2(1,:), a_lla2(2,:), 'x', LineWidth=2.5);
+legend("RCVR1", "RCVR2", Location="northwest");
+geobasemap satellite;
+geolimits([32.5911, 32.5953], [-85.4864, -85.4803]);
 title("Regular Positioning")
 set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
@@ -244,13 +260,24 @@ fprintf("mean = %f\n", b_mu);
 fprintf("std2 = %f\n", b_std2);
 fprintf("mean2 = %f\n", b_mu2);
 
-ax = geoaxes(Parent=tab(2));
-geoplot(a_lla2(1,:), a_lla2(2,:), 'o', LineWidth=2.5);
+ax = geoaxes(Parent=tab(3));
+geoplot(a_lla2(1,:), a_lla2(2,:), 'co', LineWidth=2.5);
 hold on;
 geoplot(b_lla(1,:), b_lla(2,:), 'x', LineWidth=2.5);
 geoplot(b_lla2(1,:), b_lla2(2,:), '.', LineWidth=2.5);
-legend("RCVR2", "RCVR1 DGPS", "RCVR1 Recursive DGPS");
+legend("RCVR2", "RCVR1 DGPS", "RCVR1 Recursive DGPS", Location="northwest");
 geobasemap satellite;
+title("DGPS Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
+
+ax = geoaxes(Parent=tab(4));
+geoplot(a_lla2(1,:), a_lla2(2,:), 'co', LineWidth=2.5);
+hold on;
+geoplot(b_lla(1,:), b_lla(2,:), 'x', LineWidth=2.5);
+geoplot(b_lla2(1,:), b_lla2(2,:), '.', LineWidth=2.5);
+legend("RCVR2", "RCVR1 DGPS", "RCVR1 Recursive DGPS", Location="northwest");
+geobasemap satellite;
+geolimits([32.5911, 32.5953], [-85.4864, -85.4803]);
 title("DGPS Positioning")
 set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
@@ -349,14 +376,26 @@ fprintf("mean 8 min = %f\n", c_mu2);
 fprintf("std 15 min = %f\n", c_std3);
 fprintf("mean 15 min = %f\n", c_mu3);
 
-ax = geoaxes(Parent=tab(3));
-geoplot(a_lla2(1,:), a_lla2(2,:), 'o', LineWidth=2.5);
+ax = geoaxes(Parent=tab(5));
+geoplot(a_lla2(1,:), a_lla2(2,:), 'co', LineWidth=2.5);
 hold on;
 geoplot(c_lla(1,:,1), c_lla(2,:,1), 'x', LineWidth=3.5);
 geoplot(c_lla(1,:,2), c_lla(2,:,2), 'x', LineWidth=1.5);
 geoplot(c_lla(1,:,3), c_lla(2,:,3), 'x', LineWidth=0.5);
-legend("RCVR2", "2 MIN", "8 MIN", "15 MIN");
+legend("RCVR2", "2 MIN", "8 MIN", "15 MIN", Location="northwest");
 geobasemap satellite;
+title("Carrier Smoothed DGPS Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
+
+ax = geoaxes(Parent=tab(6));
+geoplot(a_lla2(1,:), a_lla2(2,:), 'co', LineWidth=2.5);
+hold on;
+geoplot(c_lla(1,:,1), c_lla(2,:,1), 'x', LineWidth=3.5);
+geoplot(c_lla(1,:,2), c_lla(2,:,2), 'x', LineWidth=2.5);
+geoplot(c_lla(1,:,3), c_lla(2,:,3), 'x', LineWidth=1.5);
+legend("RCVR2", "2 MIN", "8 MIN", "15 MIN", Location="northwest");
+geobasemap satellite;
+geolimits([32.5911, 32.5953], [-85.4864, -85.4803]);
 title("Carrier Smoothed DGPS Positioning")
 set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
@@ -473,12 +512,22 @@ d_std = std(d_dist);
 fprintf("std rtk = %f\n", d_std);
 fprintf("mean rtk = %f\n", d_mu);
 
-ax = geoaxes(Parent=tab(4));
-geoplot(a_lla2(1,:), a_lla2(2,:), 'o', LineWidth=2.5);
+ax = geoaxes(Parent=tab(7));
+geoplot(a_lla2(1,:), a_lla2(2,:), 'co', LineWidth=2.5);
 hold on;
 geoplot(d_lla(1,:), d_lla(2,:), 'x', LineWidth=2.5);
-legend("RCVR2", "RCVR1 RTK DGPS");
+legend("RCVR2", "RCVR1 RTK DGPS", Location="northwest");
 geobasemap satellite;
+title("RTK DGPS Positioning")
+set(findall(gcf,'-property','FontSize'),'FontSize',16)
+
+ax = geoaxes(Parent=tab(8));
+geoplot(a_lla2(1,:), a_lla2(2,:), 'co', LineWidth=2.5);
+hold on;
+geoplot(d_lla(1,:), d_lla(2,:), 'x', LineWidth=2.5);
+legend("RCVR2", "RCVR1 RTK DGPS", Location="northwest");
+geobasemap satellite;
+geolimits([32.5911, 32.5953], [-85.4864, -85.4803]);
 title("RTK DGPS Positioning")
 set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
@@ -505,7 +554,7 @@ course = wrapTo360(atan2d(VE1 , VN1));
 % course(speed < 2) = 0;
 psi = wrapTo360(atand((E2-E1) ./ (N2-N1))-15);
 
-ax = axes(Parent=tab(5));
+f1 = figure(Units='normalized', Position=[1.1, 0.5, 1.3, 0.4]);
 hold on;
 plot(course,'.b', LineWidth=2);
 plot(psi,'r', LineWidth=2);
@@ -518,7 +567,7 @@ set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 
 %% dist plot
-ax = axes(Parent=tab(6));
+f2 = figure(Units='normalized', Position=[1.1, 0.5, 1.3, 0.4]);
 hold on;
 plot(a_dist, 'o', LineWidth=2.5);
 plot(b_dist, 'o', LineWidth=1.5);
@@ -537,9 +586,13 @@ set(findall(gcf,'-property','FontSize'),'FontSize',16)
 
 %%
 exportgraphics(tab(1), "./media/p3_a.png");
-exportgraphics(tab(2), "./media/p3_b.png");
-exportgraphics(tab(3), "./media/p3_c.png");
-exportgraphics(tab(4), "./media/p3_d.png");
-exportgraphics(tab(5), "./media/p3_e.png");
-exportgraphics(tab(6), "./media/p3_comp.png");
+exportgraphics(tab(2), "./media/p3_a1.png");
+exportgraphics(tab(3), "./media/p3_b.png");
+exportgraphics(tab(4), "./media/p3_b1.png");
+exportgraphics(tab(5), "./media/p3_c.png");
+exportgraphics(tab(6), "./media/p3_c1.png");
+exportgraphics(tab(7), "./media/p3_d.png");
+exportgraphics(tab(8), "./media/p3_d1.png");
+exportgraphics(f1, "./media/p3_e.png");
+exportgraphics(f2, "./media/p3_comp.png");
 
