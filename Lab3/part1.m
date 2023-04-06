@@ -27,7 +27,13 @@ tab(5) = uitab("F", Parent=tbs);
 % save("+data/RCVR_D2.mat", "D2");
 
 load("+data/RCVR_S1.mat");
+
 c = 299792458;  % speed of light
+L1 = 1575.42e6;
+L2 = 1227.60e6;
+lambda1 = c / L1;
+lambda2 = c / L2;
+
 L = length(S1);
 % svInUse = [1, 3, 6, 7, 8, 13, 14, 17, 19, 21, 30];
 svInUse = [1, 7, 13, 14, 17, 19, 21, 30];
@@ -208,7 +214,7 @@ for i = 1:L
     end
 
     % 3) CORRECT PSUEDORANGE AND RECALCULATE
-    psuedo = psuedo - T_iono(:,i);
+    psuedo = psuedo - c.*T_iono(:,i);
     [c_x(:,i), c_b(:,i), ~, c_DOP(:,:,i), ~] = utils.gnssPos(svPos, psuedo, 0.5);
     c_lla(i,:) = ecef2lla(c_x(:,i)');
 end
