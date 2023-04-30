@@ -240,8 +240,9 @@ From the first 10 ms of data clear correlation spike can be seen for satellites 
         \caption{Satellite 30 Acquisition Next 10 ms.}
     \end{figure}
 For this next 10 ms of data correlation peaks can now be seen for each of the satellites. The peaks for satellites 14 and 17 become more pronounced, and satellite 21 gains a peak. Satellites 1, 7, 14, 17, 21, and 30 have all been acquired for the first 20 ms of data. This is now more than enough satellites to get a position solution.
+\end{enumerate}
 
-    \item \textbf{Tracking}\\
+\item \textbf{Tracking}\\
 After acquiring the satellites, tracking was then performed to read the data bits. To perform the
 tracking a PLL with a 10 Hz bandwidth alongside a 2 Hz DLL. The PLL and the DLL were designed using 
 the following equation:
@@ -249,7 +250,7 @@ the following equation:
         \omega_n = \dfrac{4BW\zeta}{1+\zeta^2}
     \end{equation}
 where $BW_{pll} = 10$, $\zeta_{pll} = 0.707$, $BW_{dll} = 2$, and $\zeta_{dll} = 1.414$. 
-From here the controler gains were calculated.
+From here the controller gains were calculated using the following equations:
     \begin{equation}
         \begin{split}
             K_p &= \zeta \omega_n \\
@@ -257,14 +258,36 @@ From here the controler gains were calculated.
         \end{split}
     \end{equation}
 
-This results in an Inphase and Quadrature plot similar to the one below for each satellite 
-previously specified.
+These gains result in an Inphase and Quadrature plot similar to the one below for each satellite 
+previously specified. \emph{Figure 23} shows the Inphase and Quadrature for satellite 7.
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.9\textwidth]{Lab_4_IQ.png}
         \caption{Inphase and Quadrature of SV\#14.}
     \end{figure}
-
-
-\end{enumerate}
+It can be seen from the figure that the satellite has been successfully tracked. After tracking has been completed, the data bits are then read after searching for the preamble. For this satellite, the preamble for subframe 4 was the first preamble detected, and the other 4 subframes immediately followed. To read the time of week (TOW) and the week number (WN) for the data, subframe 1 needed to be decoded. The WN number was calculated by decoding the 10 MSB of the 3rd word. After adding the year rollover, a WN of 2253 was found. The TOW was calculated by decoding the first 17 bits of the HOW, or 2nd word. The TOW was found to be 413646. \emph{Figure 24} shows the resulting MATLAB proof of the TOW and WN determinations.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{Lab_4_Subframe1_SV7.png}
+        \caption{Z-COunt Results for Satellite 7.}
+    \end{figure}
+After decoding the z-count, the carrier phase and doppler can be determined for the tracked satellite. Both of these come from the output of the DLL and PLL. \emph{Figure 25} shows the resulting carrier phase and doppler for satellite 7.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{Lab_4_Tracking_SV7.png}
+        \caption{Carrier Phase and Doppler Satellite 7.}
+    \end{figure}
+The tracking algorithm was then tested for its resilience to noise. Initially, noise with a standard deviation of 6 was applied to the IF data for satellite 7. \emph{Figure 26} shows the resulting Inphase and Quadrature for this noise scenario.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{Lab_4_Tracking_6sig_SV7.png}
+        \caption{Inphase and Quadrature Satellite 7 (6 sig).}
+    \end{figure}
+From the figure, it can be seen that the tracking loop can still track the satellite despite this added noise. However this is only works for satellite 7 which is firmly in view. Additionally, when more noise is added to the IF Data, the tracking solution breaks down. \emph{Figure 26} shows the results of increasing the noise to a stanard deviation of 12. 
+     \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{Lab_4_Tracking_12sig_SV7.png}
+        \caption{Inphase and Quadrature Satellite 7 (12 sig).}
+    \end{figure}
+The Inphase and Quadrature are no longer indistinguishable after the addition of more noise. Thus, the satellite is no longer able to be tracked. However, as proven in previous parts, the satellite can still be acquired. It takes less noise to hinder the tracking of a satellite than the acquisition. After reading the data bits, the next step in determining a position solution from the receiver is to determine the psuedoranges. However, we were not able to successfully complete this task before the due date.
 \end{document}
