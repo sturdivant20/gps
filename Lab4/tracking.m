@@ -36,7 +36,7 @@ n_ms = 1;
 % time for genrated signal
 t = 0 : 1/nSamples*T_s : n_ms*T_s-(1/nSamples*T_s);
 
-f_dopp = -5000:10:5000;
+f_dopp = -5000:50:5000;
 R = zeros(length(f_dopp), n_ms*nSamples, length(svInUse));
 
 % initialize (for speed :])
@@ -63,7 +63,7 @@ for i = svInUse
     [dopp_offset(k),code_offset(k),~] = find(R(:,:,k) == max(R(:,1:20000,k),[],'all'),1);
     fprintf("SV%d\n",i);
     fprintf("Initial Doppler: %d Hz\n", f_dopp(dopp_offset(k)));
-    fprintf("Initial Code Offset: %d chips\n", round(code_offset(k)/20));
+    fprintf("Initial Code Offset: %d samples\n", code_offset(k));
     fprintf("---------------------------------------------------------\n");
     k = k+1;
 
@@ -84,16 +84,15 @@ end
 clearvars -except fid sig f_dopp dopp_offset code_offset svInUse f_if f_s ca_code
 fprintf("\n");
 
+% close file
+fclose(fid);
+
 
 %% TRACKING
 fprintf("<strong>TRACKING</strong>\n");
 
-fName = 'gpsBase_IFEN_IF_new2.bin';
-fid = fopen(sprintf('%s',fName));
-fseek(fid, 0, 'bof');
-
 % PLL
-BW = 25;                   % PLL bandwidth (10-18 Hz)
+BW = 10;                   % PLL bandwidth (10-18 Hz)
 K1 = 4;                    % loop gain
 z = 1.0*sind(45);          % damping ratio
 w = BW*4*z / (1+z^2);      % natural frequency
@@ -101,7 +100,7 @@ Kp_pll = z*w;
 Ki_pll = w^2;
 
 % DLL
-BW = 10;                    % DLL bandwidth (1-5 Hz)
+BW = 2;                   % DLL bandwidth (1-5 Hz)
 K2 = 4;                    % loop gain
 z = 2.0*sind(45);          % damping ratio
 w = BW*4*z / (1+z^2);      % natural frequency
@@ -109,7 +108,7 @@ Kp_dll = z*w;
 Ki_dll = w^2;
 
 % initialize (for speed :])
-len = 1*1000;      % 60 seconds
+len = 60*1000;      % 60 seconds
 IE = zeros(length(svInUse),len);
 IP = zeros(length(svInUse),len);
 IL = zeros(length(svInUse),len);
@@ -133,8 +132,13 @@ frame = logical(zeros(length(svInUse),1));
 disc_pll = zeros(length(svInUse),1);
 disc_dll = zeros(length(svInUse),1);
 preamble = [1, -1, -1, -1, 1, -1, 1, 1];
+s = 1;
 
 for j = 2
+
+    fName = 'gpsBase_IFEN_IF_new2.bin';
+    fid = fopen(sprintf('%s',fName));
+    fseek(fid, 0, 'bof');
 
     for i = 1:len
 
@@ -146,12 +150,12 @@ for j = 2
         t = (0 : 1/dataSize(j,i) : 1 - 1/dataSize(j,i)) * t_int;
     
         % inphase and quadrature
-        IE(j,i) = sum(circshift(prn_up, code_offset+10) .* sig' .* sin(2*pi*f_phase(j,i)*t + theta(j,i)));
-        IP(j,i) = sum(circshift(prn_up, code_offset)    .* sig' .* sin(2*pi*f_phase(j,i)*t + theta(j,i)));
-        IL(j,i) = sum(circshift(prn_up, code_offset-10) .* sig' .* sin(2*pi*f_phase(j,i)*t + theta(j,i)));
-        QE(j,i) = sum(circshift(prn_up, code_offset+10) .* sig' .* cos(2*pi*f_phase(j,i)*t + theta(j,i)));
-        QP(j,i) = sum(circshift(prn_up, code_offset)    .* sig' .* cos(2*pi*f_phase(j,i)*t + theta(j,i)));
-        QL(j,i) = sum(circshift(prn_up, code_offset-10) .* sig' .* cos(2*pi*f_phase(j,i)*t + theta(j,i)));
+        IE(j,i) = sum(circshift(prn_up, code_offset(j)+10) .* sig' .* sin(2*pi*f_phase(j,i)*t + theta(j,i)));
+        IP(j,i) = sum(circshift(prn_up, code_offset(j))    .* sig' .* sin(2*pi*f_phase(j,i)*t + theta(j,i)));
+        IL(j,i) = sum(circshift(prn_up, code_offset(j)-10) .* sig' .* sin(2*pi*f_phase(j,i)*t + theta(j,i)));
+        QE(j,i) = sum(circshift(prn_up, code_offset(j)+10) .* sig' .* cos(2*pi*f_phase(j,i)*t + theta(j,i)));
+        QP(j,i) = sum(circshift(prn_up, code_offset(j))    .* sig' .* cos(2*pi*f_phase(j,i)*t + theta(j,i)));
+        QL(j,i) = sum(circshift(prn_up, code_offset(j)-10) .* sig' .* cos(2*pi*f_phase(j,i)*t + theta(j,i)));
     
         % dll
         disc_dll_old = disc_dll(j);
@@ -166,104 +170,127 @@ for j = 2
         theta(j,i+1) = rem(theta(j,i) + 2*pi*f_phase(j,i)*t_int, 2*pi);
         f_phase(j,i+1) = f_phase(j,i) + K1*(Ki_pll*t_int*disc_pll(j) + Kp_pll*(disc_pll(j) - disc_pll_old));
     
-%         % record bit
-%         if k(j) == 0
-%             bit_old = bit_new(j);
-%             bit_new(j) = sign(IP(j,i));
-%         
-%             % determine first bit flip
-%             if i > 500
-%                 if bit_old ~= bit_new(j)
-%                     fprintf("SV%d First real bit flip: %d ms\n", svInUse(j), i);
-%                     k(j) = i;
-%                     bit(j,1) = bit_new(j);
-%                     ii(j) = 2;
-%                 end
-%             end
-%         else
-%             if ~mod(i,20)
-%                 bit(j,ii(j)) = sign(IP(j,i-1));
-%     
-%                 % find preamble back in time
-%                 if ii(j) > 300 && ~frame(j)
-%                     if isequal(bit(j,ii(j)-7:ii(j)), preamble) || isequal(bit(j,ii(j)-7:ii(j)), -preamble)
-%                         if isequal(bit(j,(ii(j)-7:ii(j))-300), preamble) || isequal(bit(j,(ii(j)-7:ii(j))-300), -preamble)
-%                             fprintf("SV%d Preamble starts at bit %d\n", svInUse(j), ii(j)-307);
-%                             frame(j) = true;
-%                             k(j) = ii(j)-307;
-%                         end
-%                     end
-%                 end
-%     
-%                 ii(j) = ii(j) + 1;
-%             end
-%         end
+        % record bit
+        if k(j) == 0
+            bit_old = bit_new(j);
+            bit_new(j) = sign(IP(j,i));
+        
+            % determine first bit flip
+            if i > 500
+                if bit_old ~= bit_new(j)
+                    fprintf("SV%d First real bit flip: %d ms\n", svInUse(j), i);
+                    k(j) = i;
+                    bit(j,1) = bit_new(j);
+                    ii(j) = 2;
+                end
+            end
+        else
+            if ~mod(i,20)
+                bit(j,ii(j)) = s * sign(IP(j,i-1));
+    
+                % find preamble back in time
+                if ii(j) > 300 && ~frame(j)
+                    if isequal(bit(j,ii(j)-7:ii(j)), preamble)
+                        if isequal(bit(j,(ii(j)-7:ii(j))-300), preamble)
+                            fprintf("SV%d Preamble starts at bit %d\n", svInUse(j), ii(j)-307);
+                            frame(j) = true;
+                            k(j) = ii(j)-307;
+                            s = -1;
+                            bit(j,1:ii(j)) = -bit(j,1:ii(j));
+                        end
+                    elseif isequal(bit(j,ii(j)-7:ii(j)), -preamble)
+                        if isequal(bit(j,(ii(j)-7:ii(j))-300), -preamble)
+                            fprintf("SV%d -Preamble starts at bit %d\n", svInUse(j), ii(j)-307);
+                            frame(j) = true;
+                            k(j) = ii(j)-307;
+                            s = +1;
+                        end
+                    end
+                end
+
+                ii(j) = ii(j) + 1;
+            end
+        end
 
     end
 
+    % close file
+    fclose(fid);
+
 end
 
-% close file
-fclose(fid);
 fprintf("\n");
 
 
-% %% data
+%% data
 % subframes?
-% b1.frame = bit(258:258+299);
-% b1.frame = bit(j,k(j):k(j)+299);
-% b1.frame(b1.frame < 0) = 0;
-% b1.preamble = b1.frame(1:8);
-% b1.Fnum = b1.frame(50:52);
-% b1.ToW = b1.frame(31:47);
-% b1.Fnum_n = bin2dec(sprintf('%d', b1.Fnum));
-% b1.ToW_n = 6*bin2dec(sprintf('%d', b1.ToW));
-% 
-% b2.frame = bit(558:558+299);
-% b2.frame = bit(j,(k(j):k(j)+299)+300);
-% b2.frame(b2.frame < 0) = 0;
-% b2.preamble = b2.frame(1:8);
-% b2.Fnum = b2.frame(50:52);
-% b2.ToW = b2.frame(31:47);
-% b2.Fnum_n = bin2dec(sprintf('%d', b2.Fnum));
-% b2.ToW_n = 6*bin2dec(sprintf('%d', b2.ToW));
-% 
-% b3.frame = bit(858:858+299);
-% b3.frame = bit(j,(k(j):k(j)+299)+600);
-% b3.frame(b3.frame < 0) = 0;
-% b3.preamble = b3.frame(1:8);
-% b3.Fnum = b3.frame(50:52);
-% b3.ToW = b3.frame(31:47);
-% b3.Fnum_n = bin2dec(sprintf('%d', b3.Fnum));
-% b3.ToW_n = 6*bin2dec(sprintf('%d', b3.ToW));
-% 
-% b4.frame = bit(1158:1158+299);
-% b4.frame = bit(j,(k(j):k(j)+299)+900);
-% b4.frame(b4.frame < 0) = 0;
-% b4.preamble = b4.frame(1:8);
-% b4.Fnum = b4.frame(50:52);
-% b4.ToW = b4.frame(31:47);
-% b4.Fnum_n = bin2dec(sprintf('%d', b4.Fnum));
-% b4.ToW_n = 6*bin2dec(sprintf('%d', b4.ToW));
-% 
-% b5.frame = bit(1458:1458+299);
-% b5.frame = bit(j,(k(j):k(j)+299)+1200);
-% b5.frame(b5.frame < 0) = 0;
-% b5.preamble = b5.frame(1:8);
-% b5.Fnum = b5.frame(50:52);
-% b5.ToW = b5.frame(31:47);
-% b5.Fnum_n = bin2dec(sprintf('%d', b5.Fnum));
-% b5.ToW_n = 6*bin2dec(sprintf('%d', b5.ToW));
-% 
-% b6.frame = bit(1758:1758+299);
-% b6.frame = bit(j,(k(j):k(j)+299)+1500);
-% b6.frame(b6.frame < 0) = 0;
-% b6.preamble = b6.frame(1:8);
-% b6.Fnum = b6.frame(50:52);
-% b6.ToW = b6.frame(31:47);
-% b6.Fnum_n = bin2dec(sprintf('%d', b6.Fnum));
-% b6.ToW_n = 6*bin2dec(sprintf('%d', b6.ToW));
-% 
+b1.frame = bit(j,k(j):k(j)+299);
+b1.frame(b1.frame < 0) = 0;
+b1.preamble = b1.frame(1:8);
+b1.Fnum = b1.frame(50:52);
+b1.WN = b1.frame(61:70);
+b1.ToW = b1.frame(31:47);
+b1.ToW2 = b1.frame(71:87);
+b1.Fnum_n = bin2dec(sprintf('%d', b1.Fnum));
+b1.WN_n = bin2dec(sprintf('%d', b1.WN));
+b1.ToW_n = 6*bin2dec(sprintf('%d', b1.ToW));
+b1.ToW2_n = 6*bin2dec(sprintf('%d', b1.ToW2));
+
+b2.frame = bit(j,(k(j):k(j)+299)+300);
+b2.frame(b2.frame < 0) = 0;
+b2.preamble = b2.frame(1:8);
+b2.Fnum = b2.frame(50:52);
+b2.WN = b2.frame(61:70);
+b2.ToW = b2.frame(31:47);
+b2.ToW2 = b2.frame(71:87);
+b2.Fnum_n = bin2dec(sprintf('%d', b2.Fnum));
+b2.WN_n = bin2dec(sprintf('%d', b2.WN));
+b2.ToW_n = 6*bin2dec(sprintf('%d', b2.ToW));
+b2.ToW2_n = 6*bin2dec(sprintf('%d', b2.ToW2));
+
+b3.frame = bit(j,(k(j):k(j)+299)+600);
+b3.Fnum = b3.frame(50:52);
+b3.Fnum(b3.Fnum < 0) = 0;
+b3.ToW = b3.frame(31:47);    % ToW from HOW
+b3.ToW(b3.ToW < 0) = 0;
+b3.WN = -b3.frame(61:70);
+b3.WN(b3.WN < 0) = 0;
+b3.Subframe = bin2dec(sprintf('%d', b3.Fnum));
+b3.WeekNumber = 2*1024 + bin2dec(sprintf('%d', b3.WN));
+b3.TimeOfWeek = 6*bin2dec(sprintf('%d', b3.ToW));
+
+b4.frame = bit(j,(k(j):k(j)+299)+900);
+b4.frame(b4.frame < 0) = 0;
+b4.preamble = b4.frame(1:8);
+b4.Fnum = b4.frame(50:52);
+b4.WN = b4.frame(61:71);
+b4.ToW = b4.frame(31:47);
+b4.ToW2 = b4.frame(71:87);
+b4.Fnum_n = bin2dec(sprintf('%d', b4.Fnum));
+b4.WN_n = bin2dec(sprintf('%d', b4.WN));
+b4.ToW_n = 6*bin2dec(sprintf('%d', b4.ToW));
+b4.ToW2_n = 6*bin2dec(sprintf('%d', b4.ToW2));
+
+b5.frame = bit(j,(k(j):k(j)+299)+1200);
+b5.frame(b5.frame < 0) = 0;
+b5.preamble = b5.frame(1:8);
+b5.Fnum = b5.frame(50:52);
+b5.WN = b5.frame(61:71);
+b5.ToW = b5.frame(31:47);
+b5.ToW2 = b5.frame(71:87);
+b5.Fnum_n = bin2dec(sprintf('%d', b5.Fnum));
+b5.WN_n = bin2dec(sprintf('%d', b5.WN));
+b5.ToW_n = 6*bin2dec(sprintf('%d', b5.ToW));
+b5.ToW2_n = 6*bin2dec(sprintf('%d', b5.ToW2));
+
+b6.frame = bit(j,(k(j):k(j)+299)+1500);
+b6.frame(b6.frame < 0) = 0;
+b6.preamble = b6.frame(1:8);
+b6.Fnum = b6.frame(50:52);
+b6.ToW = b6.frame(31:47);
+b6.Fnum_n = bin2dec(sprintf('%d', b6.Fnum));
+b6.ToW_n = 6*bin2dec(sprintf('%d', b6.ToW));
+
 % b7.frame = bit(2058:2058+299);
 % b7.frame = bit(j,(k(j):k(j)+299)+1800);
 % b7.frame(b7.frame < 0) = 0;
@@ -292,11 +319,11 @@ fprintf("\n");
 % b9.ToW_n = 6*bin2dec(sprintf('%d', b9.ToW));
 
 
-% %%
+%%
 figure;
 hold on;
-plot(IP(j,:), '.', LineWidth=1.5);
-plot(QP(j,:), '.', LineWidth=1.5);
+plot(IP(j,:), LineWidth=1.5);
+plot(QP(j,:), LineWidth=1.5);
 title("Tracking Prompt Correlators");
 xlabel("Integration Periods [1 ms]");
 ylabel("Correlation");
@@ -304,14 +331,25 @@ legend("IP", "QP");
 
 figure;
 hold on;
-plot(IE(j,:), '.', LineWidth=1.5);
-plot(IL(j,:), '.', LineWidth=1.5);
-plot(QE(j,:), '.', LineWidth=1.5);
-plot(QL(j,:), '.', LineWidth=1.5);
+plot(IE(j,:), LineWidth=1.5);
+plot(IL(j,:), LineWidth=1.5);
+plot(QE(j,:), LineWidth=1.5);
+plot(QL(j,:), LineWidth=1.5);
 title("Tracking Early / Late Correlators");
 xlabel("Integration Periods [1 ms]");
 ylabel("Correlation");
 legend("IE", "IL", "QP", "QL");
+
+figure;
+subplot(2,1,1);
+plot((0:60000)./1000, f_phase(j,:) - f_if);
+title("Doppler")
+ylabel("Doppler [Hz]");
+subplot(2,1,2);
+plot((0:60000)./1000, theta(j,:));
+title("Phase")
+xlabel("Time [s]");
+ylabel("Phase [rad]")
 % 
 % figure;
 % stairs(bit);

@@ -240,7 +240,31 @@ From the first 10 ms of data clear correlation spike can be seen for satellites 
         \caption{Satellite 30 Acquisition Next 10 ms.}
     \end{figure}
 For this next 10 ms of data correlation peaks can now be seen for each of the satellites. The peaks for satellites 14 and 17 become more pronounced, and satellite 21 gains a peak. Satellites 1, 7, 14, 17, 21, and 30 have all been acquired for the first 20 ms of data. This is now more than enough satellites to get a position solution.
-\end{enumerate}
 
-    
+    \item \textbf{Tracking}\\
+After acquiring the satellites, tracking was then performed to read the data bits. To perform the
+tracking a PLL with a 10 Hz bandwidth alongside a 2 Hz DLL. The PLL and the DLL were designed using 
+the following equation:
+    \begin{equation}
+        \omega_n = \dfrac{4BW\zeta}{1+\zeta^2}
+    \end{equation}
+where $BW_{pll} = 10$, $\zeta_{pll} = 0.707$, $BW_{dll} = 2$, and $\zeta_{dll} = 1.414$. 
+From here the controler gains were calculated.
+    \begin{equation}
+        \begin{split}
+            K_p &= \zeta \omega_n \\
+            K_i &= \omega_n^2
+        \end{split}
+    \end{equation}
+
+This results in an Inphase and Quadrature plot similar to the one below for each satellite 
+previously specified.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{Lab_4_IQ.png}
+        \caption{Inphase and Quadrature of SV\#14.}
+    \end{figure}
+
+
+\end{enumerate}
 \end{document}
